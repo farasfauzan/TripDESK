@@ -41,4 +41,4 @@ Tidak ada test runner. Verifikasi WAJIB dilakukan dengan menjalankan API + build
 
 ## Status requirement
 
-7 ketentuan TA sudah terpenuhi di kode kecuali unggah GitHub, deploy PWA, dan asistensi. Detail ada di `docs/RENCANA.md`; jangan menandainya selesai sebelum benar-benar dilakukan.
+7 ketentuan TA sudah terpenuhi di kode dan repo sudah diunggah ke GitHub; sisa deploy PWA dan asistensi. Detail ada di `docs/RENCANA.md`; jangan menandainya selesai sebelum benar-benar dilakukan.

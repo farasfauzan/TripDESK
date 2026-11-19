@@ -2,7 +2,7 @@
 
 Aplikasi pemesanan tiket **travel shuttle antarkota** — pencarian rute, jadwal, pilih kursi, e-tiket, dan pembatalan. Dibuat sebagai Tugas Akhir Praktikum Pengembangan Perangkat Bergerak (PPB) 2026.
 
-Status: **skeleton berjalan** (API + UI + alur pemesanan end-to-end), belum terdeploy dan belum diunggah ke GitHub.
+Status: **skeleton berjalan** (API + UI + alur pemesanan end-to-end), sudah diunggah ke [GitHub](https://github.com/farasfauzan/TripDESK), belum terdeploy.
 
 - Pemilik: Faras Fauzan Attaqi — 21120124140119
 - Asisten pembimbing: Syafik Barda
@@ -126,7 +126,7 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 | 3 | Minimal 5 halaman | 11 halaman + halaman 404 | ✅ |
 | 4 | 2 halaman list + detail | Jadwal → detail jadwal; Pesanan → detail pesanan | ✅ |
 | 5 | Halaman Profile/About | `/profil` dan `/tentang` | ✅ |
-| 6 | Source code di GitHub | Belum diunggah (langkah berikutnya) | ⏳ |
+| 6 | Source code di GitHub | [farasfauzan/TripDESK](https://github.com/farasfauzan/TripDESK) | ✅ |
 | 7 | Judul tidak sama dengan praktikan lain | "Tripdesk" belum dipakai di sheet | ✅ |
 | — | PWA deploy free hosting | Build siap, belum deploy | ⏳ |
 | — | Asistensi minimal 1× + lembar asistensi | Belum dijadwalkan | ⏳ |

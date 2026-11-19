@@ -32,7 +32,7 @@ Sumber: Google Sheet "Pemilihan Asisten TA PPB 2026", baris Faras Fauzan Attaqi 
 | 3 | Minimal 5 halaman | 11 halaman di `app/src/pages/` + 404 | ✅ |
 | 4 | 2 halaman list + detail | `/cari` → `/jadwal/:id`, `/pesanan` → `/pesanan/:code` | ✅ |
 | 5 | Profile/About | `/profil` dan `/tentang` | ✅ |
-| 6 | Source code di GitHub | repo lokal siap, belum dibuat/unggah | ⏳ |
+| 6 | Source code di GitHub | publik di [farasfauzan/TripDESK](https://github.com/farasfauzan/TripDESK) | ✅ |
 | 7 | Judul unik | "Tripdesk - Tiket Travel Antarkota" belum ada duplikat di sheet | ✅ |
 | — | PWA wajib deploy free hosting | manifest + service worker siap, deploy belum | ⏳ |
 | — | Asistensi minimal 1× | belum dijadwalkan | ⏳ |
@@ -89,7 +89,7 @@ Keputusan teknis:
 
 ## 6. Backlog berikutnya (prioritas)
 
-1. **P0 — deploy & repo**: unggah ke GitHub, deploy API + PWA, isi kolom GitHub di sheet.
+1. **P0 — deploy**: deploy API + PWA, isi kolom GitHub di sheet.
 2. **P0 — asistensi**: jadwalkan minimal 1× dengan asisten, isi lembar asistensi.
 3. **P1 — autentikasi**: login/registrasi, pesanan terikat akun (bukan daftar global demo).
 4. **P1 — pembayaran**: pilih metode, status `menunggu pembayaran` → `dibayar`, halaman instruksi.
@@ -107,7 +107,7 @@ Keputusan teknis:
 | 19 Nov 2026 | Skeleton API + UI + alur pesanan | ✅ |
 | 20–21 Nov 2026 | Polish UI, uji alur, perbaikan validasi | ⏳ |
 | 22 Nov 2026 | Deploy API + PWA, uji di HP | ⏳ |
-| 23 Nov 2026 | Asistensi + unggah GitHub + isi sheet | ⏳ |
+| 23 Nov 2026 | Asistensi + isi sheet (repo GitHub sudah diunggah 19 Nov) | ⏳ |
 | 24 Nov 2026 | Buffer perbaikan | ⏳ |
 | 25–28 Nov 2026 | Responsi | ⏳ |
 
@@ -124,7 +124,7 @@ Keputusan teknis:
 ## 9. Checklist asistensi
 
 - [ ] Judul & platform di sheet sudah terisi (platform masih kosong).
-- [ ] Repo GitHub publik + README.
+- [x] Repo GitHub publik + README.
 - [ ] API dan PWA bisa diakses online.
 - [ ] Demo alur: cari → pilih kursi → e-tiket → batalkan.
 - [ ] Tunjukkan 7 requirement terpenuhi.
