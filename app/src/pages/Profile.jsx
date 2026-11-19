@@ -126,7 +126,7 @@ export default function Profile() {
             </div>
           </section>
 
-          <p className="fine-print is-center">Tripdesk v0.1.0 · dibuat untuk Tugas Akhir Praktikum PPB 2026</p>
+          <p className="fine-print is-center">Tripdesk v0.1.0</p>
         </>
       ) : null}
     </div>

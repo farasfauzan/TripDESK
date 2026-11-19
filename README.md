@@ -1,12 +1,10 @@
 # Tripdesk
 
-Aplikasi pemesanan tiket **travel shuttle antarkota** — pencarian rute, jadwal, pilih kursi, e-tiket, dan pembatalan. Dibuat sebagai Tugas Akhir Praktikum Pengembangan Perangkat Bergerak (PPB) 2026.
+Aplikasi pemesanan tiket **travel shuttle antarkota** — pencarian rute, jadwal, pilih kursi, e-tiket, dan pembatalan.
 
 Status: **skeleton berjalan** (API + UI + alur pemesanan end-to-end), sudah diunggah ke [GitHub](https://github.com/farasfauzan/TripDESK), belum terdeploy.
 
 - Pemilik: Faras Fauzan Attaqi — 21120124140119
-- Asisten pembimbing: Syafik Barda
-- Judul TA: _Tripdesk - Tiket Travel Antarkota_
 
 ## Stack
 
@@ -117,19 +115,17 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 10. **Profil** — data akun, statistik, kontak, pengaturan.
 11. **Tentang aplikasi** — versi, fitur, teknologi, pembuat.
 
-## Checklist requirement TA
+## Fitur & status
 
-| # | Ketentuan sheet | Implementasi | Status |
+| # | Fitur | Implementasi | Status |
 | --- | --- | --- | --- |
-| 1 | API (Web Service) sendiri sesuai Modul 1 | Express REST API, 12 endpoint, data seed sendiri | ✅ |
-| 2 | Bottom Navigation Bar | 4 tab: Beranda, Promo, Pesanan, Profil | ✅ |
-| 3 | Minimal 5 halaman | 11 halaman + halaman 404 | ✅ |
-| 4 | 2 halaman list + detail | Jadwal → detail jadwal; Pesanan → detail pesanan | ✅ |
-| 5 | Halaman Profile/About | `/profil` dan `/tentang` | ✅ |
-| 6 | Source code di GitHub | [farasfauzan/TripDESK](https://github.com/farasfauzan/TripDESK) | ✅ |
-| 7 | Judul tidak sama dengan praktikan lain | "Tripdesk" belum dipakai di sheet | ✅ |
-| — | PWA deploy free hosting | Build siap, belum deploy | ⏳ |
-| — | Asistensi minimal 1× + lembar asistensi | Belum dijadwalkan | ⏳ |
+| 1 | REST API sendiri | Express, 12 endpoint, seed data sendiri | ✅ |
+| 2 | Bottom navigation | 4 tab: Beranda, Promo, Pesanan, Profil | ✅ |
+| 3 | Halaman lengkap | 11 halaman + halaman 404 | ✅ |
+| 4 | Daftar + detail | Jadwal → detail jadwal; Pesanan → detail pesanan | ✅ |
+| 5 | Profil & tentang | `/profil` dan `/tentang` | ✅ |
+| 6 | Source code | [farasfauzan/TripDESK](https://github.com/farasfauzan/TripDESK) | ✅ |
+| 7 | Deploy PWA | Build siap, belum deploy | ⏳ |
 
 ## Reset data demo
 

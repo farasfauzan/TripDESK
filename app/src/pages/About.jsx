@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { CheckIcon, ChevronLeftIcon } from '../components/Icons.jsx'
 
 const features = [
-  'REST API buatan sendiri (Express) — sesuai Modul 1',
+  'REST API buatan sendiri (Express)',
   'Bottom navigation bar 4 tab',
   '11 halaman: beranda, peta armada, promo, cari, detail jadwal, pemesanan, pesanan, detail pesanan, lacak armada, profil, tentang',
   '2 daftar utama dengan halaman detail: jadwal travel & pesanan',
@@ -71,8 +71,6 @@ export default function About() {
         <p className="about-dev">
           <strong>Faras Fauzan Attaqi</strong>
           <span>NIM 21120124140119 · Teknik Komputer, Universitas Diponegoro</span>
-          <span>Asisten pembimbing: Syafik Barda</span>
-          <span>Tugas Akhir Praktikum Pengembangan Perangkat Bergerak 2026</span>
         </p>
       </section>
 

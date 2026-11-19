@@ -1,6 +1,6 @@
 # Rencana Tripdesk
 
-Dokumen kerja untuk Tugas Akhir PPB 2026. Status: skeleton selesai, fitur lanjutan menyusul.
+Dokumen kerja Tripdesk. Status: skeleton selesai, fitur lanjutan menyusul.
 
 ## 1. Produk
 
@@ -23,7 +23,7 @@ Beranda → Cari jadwal → Detail jadwal → Pilih kursi & data penumpang → E
 
 ## 3. Requirement sheet → implementasi
 
-Sumber: Google Sheet "Pemilihan Asisten TA PPB 2026", baris Faras Fauzan Attaqi (No. 9, kelompok Syafik Barda).
+Sumber: ketentuan tugas travel antarkota (7 poin).
 
 | # | Ketentuan | Implementasi di repo | Status |
 | --- | --- | --- | --- |
