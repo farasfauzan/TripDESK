@@ -1,0 +1,21 @@
+# Dependensi
+node_modules/
+
+# Hasil build
+dist/
+build/
+
+# Runtime data (dibuat ulang otomatis)
+server/data/bookings.json
+
+# Env & secret
+.env
+.env.local
+.env.*.local
+
+# OS / editor / log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

@@ -1,0 +1,19 @@
+{
+  "name": "tripdesk-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "REST API untuk Tripdesk - pemesanan tiket travel shuttle antarkota",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
