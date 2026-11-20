@@ -2,20 +2,22 @@ import { Router } from 'express'
 import { schedules } from '../data.js'
 import { addBooking, bookedSeats, bookingCode, findBooking, listBookings, persistBookings } from '../store.js'
 import { isIsoDate, shiftTime, todayIso } from '../dates.js'
+import { deriveStatus } from '../bookingStatus.js'
 import { etaForPickup } from '../eta.js'
 
 const router = Router()
 
 const serialize = (booking) => ({
   ...booking,
+  status: deriveStatus(booking),
   seatLabels: booking.seats.map((no) => `Kursi ${no}`),
 })
 
 router.get('/bookings', (req, res) => {
   const status = req.query.status
   const data = listBookings()
-    .filter((b) => (status ? b.status === status : true))
     .map(serialize)
+    .filter((b) => (status ? b.status === status : true))
   res.json({ data, meta: { count: data.length } })
 })
 
@@ -97,8 +99,14 @@ router.post('/bookings', (req, res) => {
 router.patch('/bookings/:code/cancel', (req, res) => {
   const booking = findBooking(req.params.code)
   if (!booking) return res.status(404).json({ error: { code: 'BOOKING_NOT_FOUND', message: 'Pesanan tidak ditemukan.' } })
-  if (booking.status === 'dibatalkan') {
+  const current = deriveStatus(booking)
+  if (current === 'dibatalkan') {
     return res.status(409).json({ error: { code: 'ALREADY_CANCELLED', message: 'Pesanan sudah dibatalkan.' } })
+  }
+  if (current !== 'terjadwal') {
+    return res.status(409).json({
+      error: { code: 'TRIP_STARTED', message: 'Perjalanan sudah dimulai, pesanan tidak bisa dibatalkan.' },
+    })
   }
   booking.status = 'dibatalkan'
   persistBookings()

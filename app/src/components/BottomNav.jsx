@@ -8,10 +8,12 @@ const items = [
   { to: '/profil', label: 'Profil', icon: UserIcon, match: ['/profil', '/tentang'] },
 ]
 
-const isMatch = (pathname, item) => {
-  if (item.to === '/') return pathname === '/' || item.match.some((path) => path !== '/' && pathname.startsWith(path))
-  return item.match.some((path) => pathname === path || pathname.startsWith(`${path}/`))
-}
+// Cocokkan per segmen path, bukan awalan mentah: "/pesanan" jangan dianggap
+// bagian dari "/pesan" (kalau pakai startsWith biasa, tab Beranda ikut nyala).
+const inSection = (pathname, path) => pathname === path || pathname.startsWith(`${path}/`)
+
+const isMatch = (pathname, item) =>
+  item.match.some((path) => (path === '/' ? pathname === '/' : inSection(pathname, path)))
 
 export default function BottomNav() {
   const { pathname } = useLocation()

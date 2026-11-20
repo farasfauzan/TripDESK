@@ -259,3 +259,11 @@ export const fleetTone = (fleet = '') => {
   if (/staria|mpv|innova|avanza/i.test(fleet)) return 'staria'
   return 'hiace'
 }
+
+export function ChevronDownIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m5.5 9.5 6.5 6.5 6.5-6.5" />
+    </svg>
+  )
+}

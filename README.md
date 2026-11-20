@@ -104,7 +104,7 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 ## Halaman
 
 1. **Beranda** — sapaan ala Gojek, peta dummy + lokasi user + armada bergerak + badge cuaca demo, grid layanan, tombol **Pesan**, tiket berikutnya, promo, rute favorit.
-2. **Peta armada** — map diperbesar berisi lokasi user, radius 5 km, marker armada kosong, pilihan tujuan/titik jemput/Sekarang-Jadwalkan, dan daftar armada.
+2. **Peta armada** — satu peta kontinu (satu `<svg>`, satu sistem koordinat): zoom = `viewBox` yang menyempit, jadi tidak ada pertukaran frame. Tiga level LOD: **Pulau Jawa** (rute + batas provinsi) → **Kota Semarang** (14 km, radius 5 km + marker armada) → **Kampus Tembalang/UNDIP** (1,6 km, jalan + bangunan + nama jalan), dikendalikan tombol ＋/−. Pilih titik jemput → kamera bergeser ke titik itu; zoom kampus hanya tersedia di Tembalang.
 3. **Promo** — daftar voucher, salin kode, dan CTA pakai promo.
 4. **Cari travel** — daftar armada (list #1) dengan jam jemput sesuai titik pilihan.
 5. **Detail jadwal** — armada, fasilitas, titik jemput + jam jemput, titik turun, CTA pesan.
@@ -126,6 +126,13 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 | 5 | Profil & tentang | `/profil` dan `/tentang` | ✅ |
 | 6 | Source code | [farasfauzan/TripDESK](https://github.com/farasfauzan/TripDESK) | ✅ |
 | 7 | Deploy PWA | Build siap, belum deploy | ⏳ |
+
+## Sumber data peta
+
+- **Jalan, pantai, sungai, dan bangunan** Kota Semarang & Tembalang: [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, lisensi ODbL. Diambil lewat Overpass API dan diubah ke km oleh `app/scripts/fetch-osm.mjs` → `app/src/osmSemarang.js`. Atribusi ditampilkan di pojok peta.
+- **Batas provinsi** Pulau Jawa: disederhanakan dari [superpikar/indonesia-geojson](https://github.com/superpikar/indonesia-geojson).
+
+Untuk memperbarui data jalan: `cd app && node scripts/fetch-osm.mjs` (butuh internet). Peta tetap ilustrasi untuk demo, bukan untuk navigasi.
 
 ## Reset data demo
 

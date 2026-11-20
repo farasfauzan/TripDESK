@@ -2591,20 +2591,6 @@ h3 {
   position: relative;
 }
 
-.nearby-map {
-  position: relative;
-  height: 370px;
-  overflow: hidden;
-  background: #e9f1eb;
-}
-
-.nearby-map > svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
 .map-back {
   position: absolute;
   top: 14px;
@@ -2643,107 +2629,6 @@ h3 {
   border-radius: 50%;
   background: var(--brand);
   animation: live-pulse 1.9s ease-in-out infinite;
-}
-
-.user-radius {
-  position: absolute;
-  top: 58%;
-  left: 50%;
-  z-index: 1;
-  width: 150px;
-  height: 150px;
-  border: 1.5px dashed rgba(34, 60, 74, 0.45);
-  border-radius: 50%;
-  background: rgba(34, 60, 74, 0.06);
-  transform: translate(-50%, -50%);
-}
-
-.user-marker {
-  position: absolute;
-  top: 58%;
-  left: 50%;
-  z-index: 4;
-  display: grid;
-  justify-items: center;
-  gap: 3px;
-  transform: translate(-50%, -50%);
-}
-
-.user-marker i {
-  width: 14px;
-  height: 14px;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  background: var(--navy);
-  box-shadow: 0 0 0 6px rgba(34, 60, 74, 0.18);
-}
-
-.user-marker span {
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 3px 8px rgba(32, 28, 23, 0.12);
-  color: var(--navy);
-  font-size: 9px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.nearby-car {
-  position: absolute;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 8px 5px 5px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 6px 16px rgba(32, 28, 23, 0.14);
-}
-
-.nearby-car-icon {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  background: var(--brand-soft);
-  color: var(--brand-ink);
-}
-
-.nearby-car-text {
-  display: grid;
-  gap: 0;
-  line-height: 1.15;
-}
-
-.nearby-car-text strong {
-  color: var(--brand-ink);
-  font-size: 10.5px;
-  font-weight: 800;
-}
-
-.nearby-car-text small {
-  color: var(--muted);
-  font-size: 8.5px;
-  font-weight: 600;
-}
-
-.nearby-pickup {
-  position: absolute;
-  bottom: 16px;
-  left: 14px;
-  z-index: 3;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 9px;
-  border-radius: 8px;
-  background: var(--surface);
-  box-shadow: 0 6px 14px rgba(32, 28, 23, 0.14);
-  font-size: 9.5px;
-  font-weight: 700;
 }
 
 .armada-sheet {
@@ -2905,4 +2790,754 @@ h3 {
 
 .map-chip.weather-rain svg {
   color: var(--navy);
+}
+
+/* ---------- Peta Pulau Jawa ---------- */
+
+.map-toggle {
+  position: absolute;
+  top: 58px;
+  right: 14px;
+  z-index: 6;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.94);
+  box-shadow: 0 4px 12px rgba(32, 28, 23, 0.12);
+  color: var(--brand-ink);
+  font-size: 10px;
+  font-weight: 800;
+  backdrop-filter: blur(6px);
+}
+
+.java-sea-label {
+  fill: #7f9aa8;
+  font-size: 8.5px;
+  font-style: italic;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.java-island-label {
+  fill: #b9a88f;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.java-city-label {
+  fill: var(--ink);
+  font-size: 9px;
+  font-weight: 800;
+  paint-order: stroke;
+  stroke: #f7f0e4;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.java-city-label.is-dest {
+  fill: var(--brand-ink);
+}
+
+.java-other-city circle {
+  fill: #c9b79f;
+}
+
+.java-other-city text {
+  fill: #8b7f6e;
+  font-size: 7.5px;
+  paint-order: stroke;
+  stroke: #f7f0e4;
+  stroke-width: 2px;
+}
+
+.java-note {
+  position: absolute;
+  bottom: 40px;
+  left: 14px;
+  z-index: 5;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 253, 249, 0.92);
+  box-shadow: 0 4px 10px rgba(32, 28, 23, 0.1);
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.java-other-city-label {
+  fill: #8b7f6e;
+  font-size: 7px;
+  letter-spacing: 0.06em;
+  paint-order: stroke;
+  stroke: #dfeaf0;
+  stroke-width: 2px;
+}
+
+.java-province-label {
+  fill: #a08a6e;
+  font-size: 6.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.java-context-city circle {
+  fill: #c9b79f;
+}
+
+.java-context-city text {
+  fill: #8b7f6e;
+  font-size: 5.8px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #f7f0e4;
+  stroke-width: 1.5px;
+}
+
+/* ---------- Peta kontinu (satu SVG, viewBox yang di-zoom) ---------- */
+
+.map-stage {
+  position: relative;
+  height: 370px;
+  overflow: hidden;
+}
+
+.zoom-map {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #dfeaf0;
+}
+
+.zoom-map > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  shape-rendering: geometricPrecision;
+}
+
+.zoom-map text {
+  font-family: var(--font);
+}
+
+.zm-art,
+.zm-labels {
+  pointer-events: none;
+}
+
+/* Ukuran di dalam grup kota memakai satuan kilometer. */
+
+.zm-city-name {
+  fill: #8c7c66;
+  font-size: 0.42px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.zm-city-place {
+  fill: #9a8a74;
+  font-size: 0.26px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.14px;
+}
+
+.zm-poi circle {
+  fill: #b9663f;
+}
+
+.zm-street .zm-poi circle {
+  r: 0.02;
+}
+
+.zm-poi text {
+  fill: #6d5f4a;
+  font-size: 0.026px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.012px;
+}
+
+.zm-car-box {
+  fill: rgba(255, 253, 249, 0.97);
+  stroke: #e4d8c6;
+  stroke-width: 0.025;
+}
+
+.zm-car {
+  cursor: pointer;
+}
+
+.zm-car:hover .zm-car-box {
+  stroke: var(--brand);
+}
+
+.zm-car-glyph .zm-car-body {
+  fill: var(--brand-ink);
+}
+
+.zm-car-glyph .zm-car-window {
+  fill: #fdfaf4;
+  opacity: 0.92;
+}
+
+.zm-car:hover .zm-car-body {
+  fill: var(--brand);
+}
+
+.zm-car-eta {
+  fill: #201c17;
+  font-size: 0.3px;
+  font-weight: 800;
+}
+
+.zm-car-seat {
+  fill: #7a6f61;
+  font-size: 0.22px;
+  font-weight: 600;
+}
+
+.zm-radius {
+  fill: rgba(111, 102, 89, 0.05);
+  stroke: #6f6659;
+  stroke-width: 0.065;
+  stroke-dasharray: 0.42 0.36;
+  stroke-linecap: round;
+  opacity: 0.6;
+}
+
+.zm-user-label {
+  fill: #3c342a;
+  font-size: 0.28px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.16px;
+}
+
+/* ---------- Level kampus (1,6 km) ---------- */
+
+.zm-campus-name {
+  fill: #9c8a70;
+  font-size: 0.05px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.014px;
+}
+
+.zm-campus-place {
+  fill: #8a7a64;
+  font-size: 0.032px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.012px;
+}
+
+.zm-st-user {
+  fill: #3c342a;
+  font-size: 0.03px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.012px;
+}
+
+.zm-st-box {
+  fill: rgba(255, 253, 249, 0.97);
+  stroke: #e4d8c6;
+  stroke-width: 0.0025;
+}
+
+.zm-st-pickup {
+  fill: #b04b2c;
+  font-size: 0.032px;
+  font-weight: 700;
+}
+
+/* ---------- Hover kontrol peta ---------- */
+
+.map-back,
+.map-toggle,
+.map-zoom button,
+.picker-close {
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.map-back:hover,
+.map-toggle:hover,
+.map-zoom button:not(:disabled):hover,
+.picker-close:hover {
+  border-color: rgba(192, 73, 43, 0.45);
+  color: var(--brand-ink);
+  box-shadow: 0 8px 20px rgba(32, 28, 23, 0.18);
+}
+
+.map-zoom button:not(:disabled):hover {
+  background: #fffdf9;
+}
+
+.map-zoom button:active:not(:disabled) {
+  background: rgba(192, 73, 43, 0.1);
+}
+
+.map-back:focus-visible,
+.map-toggle:focus-visible,
+.map-zoom button:focus-visible,
+.picker-close:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.zm-car {
+  transition: opacity 0.16s ease;
+}
+
+.zm-car:hover .zm-car-box {
+  fill: #fffdf9;
+  stroke-width: 0.05;
+}
+
+.zm-car:hover .zm-car-eta {
+  fill: var(--brand-ink);
+}
+
+/* ---------- Kontrol zoom ---------- */
+
+.map-zoom {
+  position: absolute;
+  right: 14px;
+  bottom: 26px;
+  z-index: 5;
+  display: grid;
+  gap: 6px;
+}
+
+.map-zoom button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: rgba(255, 253, 249, 0.96);
+  box-shadow: 0 6px 16px rgba(32, 28, 23, 0.14);
+  color: var(--ink);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.map-zoom button:disabled {
+  opacity: 0.42;
+}
+
+/* ---------- Peta Beranda (bingkai ~5 km, satuan km) ---------- */
+
+.map-card .r-fill,
+.map-card .r-casing {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.map-card .r-fill {
+  stroke: #ffffff;
+}
+
+.map-card .r-casing {
+  stroke: #dccdb4;
+}
+
+.map-card .r-fill.r-motorway {
+  stroke-width: 0.055;
+}
+.map-card .r-casing.r-motorway {
+  stroke-width: 0.08;
+}
+.map-card .r-fill.r-trunk {
+  stroke-width: 0.05;
+}
+.map-card .r-casing.r-trunk {
+  stroke-width: 0.074;
+}
+.map-card .r-fill.r-primary {
+  stroke-width: 0.042;
+}
+.map-card .r-casing.r-primary {
+  stroke-width: 0.063;
+}
+.map-card .r-fill.r-secondary {
+  stroke-width: 0.034;
+}
+.map-card .r-casing.r-secondary {
+  stroke-width: 0.052;
+}
+.map-card .r-fill.r-tertiary {
+  stroke-width: 0.028;
+}
+.map-card .r-casing.r-tertiary {
+  stroke-width: 0.044;
+}
+
+.map-card .r-river {
+  fill: none;
+  stroke: #a9cfdf;
+  stroke-width: 0.035;
+  stroke-linecap: round;
+}
+
+.map-card .r-route {
+  fill: none;
+  stroke: #c0492b;
+  stroke-width: 0.022;
+  stroke-dasharray: 0.16 0.14;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+/* ---------- Jalan & area dari OpenStreetMap ---------- */
+
+.zm-city .r-fill,
+.zm-street .r-fill {
+  fill: none;
+  stroke: #ffffff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.zm-city .r-casing,
+.zm-street .r-casing {
+  fill: none;
+  stroke: #d3c3a6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.zm-city .r-fill.r-motorway {
+  stroke-width: 0.115;
+}
+.zm-city .r-casing.r-motorway {
+  stroke-width: 0.16;
+}
+.zm-city .r-fill.r-trunk {
+  stroke-width: 0.105;
+}
+.zm-city .r-casing.r-trunk {
+  stroke-width: 0.148;
+}
+.zm-city .r-fill.r-primary {
+  stroke-width: 0.092;
+}
+.zm-city .r-casing.r-primary {
+  stroke-width: 0.13;
+}
+.zm-city .r-fill.r-secondary {
+  stroke-width: 0.075;
+}
+.zm-city .r-casing.r-secondary {
+  stroke-width: 0.106;
+}
+.zm-city .r-fill.r-tertiary {
+  stroke-width: 0.06;
+}
+.zm-city .r-casing.r-tertiary {
+  stroke-width: 0.086;
+}
+
+.zm-street .r-fill.r-motorway {
+  stroke-width: 0.013;
+}
+.zm-street .r-casing.r-motorway {
+  stroke-width: 0.021;
+}
+.zm-street .r-fill.r-trunk {
+  stroke-width: 0.012;
+}
+.zm-street .r-casing.r-trunk {
+  stroke-width: 0.019;
+}
+.zm-street .r-fill.r-primary {
+  stroke-width: 0.011;
+}
+.zm-street .r-casing.r-primary {
+  stroke-width: 0.017;
+}
+.zm-street .r-fill.r-secondary {
+  stroke-width: 0.0095;
+}
+.zm-street .r-casing.r-secondary {
+  stroke-width: 0.015;
+}
+.zm-street .r-fill.r-tertiary {
+  stroke-width: 0.0085;
+}
+.zm-street .r-casing.r-tertiary {
+  stroke-width: 0.013;
+}
+.zm-street .r-fill.r-unclassified {
+  stroke-width: 0.0075;
+}
+.zm-street .r-casing.r-unclassified {
+  stroke-width: 0.012;
+}
+.zm-street .r-fill.r-residential {
+  stroke-width: 0.0065;
+}
+.zm-street .r-casing.r-residential {
+  stroke-width: 0.0105;
+}
+.zm-street .r-fill.r-living_street {
+  stroke-width: 0.005;
+}
+.zm-street .r-casing.r-living_street {
+  stroke-width: 0.0085;
+}
+.zm-street .r-fill.r-service {
+  stroke-width: 0.004;
+}
+.zm-street .r-casing.r-service {
+  stroke-width: 0.007;
+}
+
+.zm-city .r-river {
+  stroke: #a9cfdf;
+  fill: none;
+  stroke-width: 0.045;
+  stroke-linecap: round;
+}
+
+.zm-street .r-river {
+  stroke: #a9cfdf;
+  fill: none;
+  stroke-width: 0.012;
+  stroke-linecap: round;
+}
+
+.r-green {
+  fill: #dfe7d5;
+  stroke: none;
+}
+
+.zm-street .r-building {
+  fill: #e8dece;
+  stroke: #dbcdb7;
+  stroke-width: 0.0015;
+}
+
+.zm-road-name {
+  fill: #9a8a72;
+  font-size: 0.024px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.01px;
+}
+
+.map-credit {
+  position: absolute;
+  bottom: 24px;
+  left: 12px;
+  z-index: 4;
+  color: #8f8069;
+  font-size: 8px;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 rgba(251, 243, 230, 0.9);
+  pointer-events: none;
+}
+
+.zm-pickup-label {
+  fill: #b04b2c;
+  font-size: 0.26px;
+  font-weight: 700;
+}
+
+/* ---------- Picker bottom sheet ---------- */
+
+.field-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fdfaf5;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+
+.field-select:hover {
+  border-color: rgba(192, 73, 43, 0.45);
+  background: #fffdf9;
+}
+
+.field-select:hover svg {
+  color: var(--brand);
+}
+
+.field-select:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.field-select svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.field-select span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Backdrop transparan: cukup jadi penangkap tap, supaya transisi kamera peta
+   tetap kelihatan saat picker terbuka. */
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  width: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.picker-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 61;
+  width: 100%;
+  max-width: 460px;
+  max-height: 44vh;
+  overflow: auto;
+  padding: 16px 18px calc(24px + env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0;
+  background: var(--surface);
+  box-shadow: 0 -18px 44px rgba(32, 28, 23, 0.26);
+  transform: translateX(-50%);
+  animation: picker-in 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes picker-in {
+  from {
+    transform: translate(-50%, 16%);
+    opacity: 0.6;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.picker-head h3 {
+  font-size: 16px;
+}
+
+.picker-close {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.picker-list {
+  display: grid;
+}
+
+.picker-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-inline: -10px;
+  padding: 13px 10px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    color 0.16s ease;
+}
+
+.picker-option:hover {
+  background: rgba(192, 73, 43, 0.1);
+  box-shadow:
+    inset 3px 0 0 var(--brand),
+    inset 0 0 0 1px rgba(192, 73, 43, 0.16);
+  color: var(--brand-ink);
+}
+
+.picker-option:hover small {
+  color: var(--brand-ink);
+  opacity: 0.8;
+}
+
+.picker-option:active {
+  background: rgba(192, 73, 43, 0.16);
+}
+
+.picker-option > span {
+  display: inline-block;
+  transition: transform 0.16s ease;
+}
+
+.picker-option:hover > span {
+  transform: translateX(3px);
+}
+
+.picker-option:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: -2px;
+}
+
+.picker-option:last-child {
+  border-bottom: 0;
+}
+
+.picker-option small {
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
+.picker-option.is-active {
+  color: var(--brand-ink);
 }

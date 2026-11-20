@@ -79,7 +79,7 @@ Keputusan teknis:
 - Pembuatan pesanan + e-tiket, salin kode, barcode dekoratif, pembatalan.
 - Daftar pesanan dengan filter status.
 - ETA armada di kartu armada (deterministik, `server/src/eta.js`) dan halaman lacak armada dengan peta animasi + timeline.
-- Peta armada diperbesar (`/armada`) dengan lokasi user, radius 5 km, marker armada kosong, dan daftar armada.
+- Peta armada diperbesar (`/armada`): satu peta kontinu dengan zoom `viewBox` (bukan tukar frame), tiga level LOD — Pulau Jawa (rute + batas provinsi), Kota Semarang 14 km (jalan OpenStreetMap, radius 5 km, marker armada), dan Kampus Tembalang 1,6 km (jalan + bangunan + nama jalan). Tombol ＋/− menggeser level; ganti titik jemput → kamera bergeser ke titik itu.
 - Uji status pelacakan otomatis: `cd app && npm run test:tracking` (6 kasus).
 - Tab Promo: daftar voucher, salin kode, CTA pakai promo.
 - Halaman profil, tentang, 404.

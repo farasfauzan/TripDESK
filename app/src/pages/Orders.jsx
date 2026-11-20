@@ -9,6 +9,8 @@ import { ArrowRightIcon, TicketIcon } from '../components/Icons.jsx'
 const filters = [
   { id: 'semua', label: 'Semua' },
   { id: 'terjadwal', label: 'Terjadwal' },
+  { id: 'berlangsung', label: 'Berlangsung' },
+  { id: 'selesai', label: 'Selesai' },
   { id: 'dibatalkan', label: 'Dibatalkan' },
 ]
 

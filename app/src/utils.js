@@ -42,6 +42,7 @@ export const durationText = (minutes) => {
 
 export const statusMeta = {
   terjadwal: { label: 'Terjadwal', tone: 'ok' },
+  berlangsung: { label: 'Berlangsung', tone: 'ok' },
   dibatalkan: { label: 'Dibatalkan', tone: 'muted' },
   selesai: { label: 'Selesai', tone: 'info' },
 }

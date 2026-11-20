@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { getLocations, getNearby, getPickupPoints } from '../api.js'
 import { dateLong, rupiah, todayIso } from '../utils.js'
-import NearbyMap from '../components/NearbyMap.jsx'
+import ZoomMap from '../components/ZoomMap.jsx'
 import { EmptyState, ErrorBox, Loading } from '../components/State.jsx'
-import { ArrowRightIcon, CalendarIcon, ChevronLeftIcon, FleetIcon } from '../components/Icons.jsx'
+import {
+  ArrowRightIcon,
+  CalendarIcon,
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  FleetIcon,
+} from '../components/Icons.jsx'
 import { gsap, useGSAP } from '../animations.js'
 
 export default function ArmadaMap() {
@@ -25,11 +32,86 @@ export default function ArmadaMap() {
   const [armada, setArmada] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [view, setView] = useState('local')
+  // LOD jalan skala kampus baru ada untuk Tembalang/UNDIP.
+  const campusDetail = form.pickupPointId === 'SMG-1'
+  const [picker, setPicker] = useState(null)
+  // Pratinjau saat kursor/fokus di atas opsi picker: peta ikut menyesuaikan
+  // sebelum pilihan benar-benar diklik.
+  const [preview, setPreview] = useState({ dest: null, pickup: null })
+  const viewBeforePicker = useRef('local')
 
   const effectiveDate = mode === 'now' ? todayIso() : form.date
   const selectedPickup =
     pickupPoints.find((point) => point.id === form.pickupPointId) ?? pickupPoints[0] ?? null
   const pickupName = selectedPickup?.name ?? 'Titik jemput'
+
+  const pickupShort = pickupName.replace(/\s*\(.*\)$/, '')
+  const destinationName =
+    locations.find((location) => location.id === form.destination)?.city ?? 'Jepara'
+
+  // Nilai yang dipakai peta: ikut pratinjau saat opsi picker di-hover.
+  const mapDestinationId = preview.dest ?? form.destination
+  const mapPickupId = preview.pickup ?? form.pickupPointId
+  const mapDestinationName =
+    locations.find((location) => location.id === mapDestinationId)?.city ?? destinationName
+  const mapPickup = pickupPoints.find((p) => p.id === mapPickupId) ?? selectedPickup ?? null
+  const mapPickupName = mapPickup?.name ?? pickupName
+
+  const changeDestination = (value) => {
+    setForm((prev) => ({ ...prev, destination: value }))
+    setView('island')
+  }
+
+  const changePickup = (value) => {
+    setForm((prev) => ({ ...prev, pickupPointId: value }))
+    setView('local')
+  }
+
+  const openDestination = () => {
+    viewBeforePicker.current = view
+    setView('island')
+    setPicker('destination')
+  }
+
+  const openPickup = () => {
+    viewBeforePicker.current = view
+    setView('local')
+    setPicker('pickup')
+  }
+
+  const clearPreview = () => setPreview({ dest: null, pickup: null })
+
+  const closePicker = () => {
+    clearPreview()
+    setPicker(null)
+    setView(viewBeforePicker.current)
+  }
+
+  const chooseDestination = (value) => {
+    clearPreview()
+    changeDestination(value)
+    setPicker(null)
+  }
+
+  const choosePickup = (value) => {
+    clearPreview()
+    changePickup(value)
+    setPicker(null)
+  }
+
+  useEffect(() => {
+    if (!campusDetail) setView((prev) => (prev === 'street' ? 'local' : prev))
+  }, [campusDetail])
+
+  useEffect(() => {
+    if (!picker) return undefined
+    const onKey = (event) => {
+      if (event.key === 'Escape') closePicker()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [picker])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -80,21 +162,12 @@ export default function ArmadaMap() {
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         gsap
           .timeline({ defaults: { ease: 'power3.out' } })
-          .fromTo(
-            '.nearby-map',
-            {
-              clipPath: 'inset(7% 8% 16% 8% round 26px)',
-              scale: 0.98,
-              opacity: 0.55,
-            },
-            {
-              clipPath: 'inset(0% 0% 0% 0% round 0px)',
-              scale: 1,
-              opacity: 1,
-              duration: 0.6,
-            },
-          )
-          .from('.map-back, .map-count', { opacity: 0, y: -10, duration: 0.3, stagger: 0.05 }, '-=0.4')
+          .from('.map-back, .map-count, .map-toggle', {
+            opacity: 0,
+            y: -10,
+            duration: 0.3,
+            stagger: 0.05,
+          })
           .from('.armada-sheet', { yPercent: 22, opacity: 0, duration: 0.5 }, '-=0.35')
           .from('.armada-controls', { opacity: 0, y: 8, duration: 0.3 }, '-=0.3')
       })
@@ -102,6 +175,13 @@ export default function ArmadaMap() {
     },
     { scope },
   )
+
+  const zoomIn = () =>
+    setView((prev) =>
+      prev === 'island' ? 'local' : prev === 'local' && campusDetail ? 'street' : prev,
+    )
+  const zoomOut = () =>
+    setView((prev) => (prev === 'street' ? 'local' : prev === 'local' ? 'island' : prev))
 
   const goBack = contextSafe(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -112,7 +192,7 @@ export default function ArmadaMap() {
       .timeline({ onComplete: () => navigate(-1) })
       .to('.armada-list', { opacity: 0, y: 8, duration: 0.18 }, 0)
       .to('.armada-sheet', { yPercent: 26, opacity: 0, duration: 0.26, ease: 'power2.in' }, 0.05)
-      .to('.nearby-map', { scale: 0.96, opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.1)
+      .to('.map-stage', { scale: 0.96, opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.1)
   })
 
   useGSAP(
@@ -121,14 +201,20 @@ export default function ArmadaMap() {
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         gsap.fromTo(
-          '.nearby-car',
-          { scale: 0.7, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.6)', stagger: 0.06 },
+          '.zm-car',
+          { opacity: 0 },
+          { opacity: 1, duration: 0.3, ease: 'power2.out', stagger: 0.06 },
         )
         gsap.fromTo(
           '.armada-card',
           { y: 12, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out', stagger: 0.05 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.35,
+            ease: 'power2.out',
+            stagger: 0.05,
+          },
         )
       })
       return () => mm.revert()
@@ -139,19 +225,62 @@ export default function ArmadaMap() {
   return (
     <div className="page armada-page" ref={scope}>
       <div className="armada-map-wrap">
-        <NearbyMap
-          armada={armada}
-          date={effectiveDate}
-          pickupId={form.pickupPointId}
-          pickupName={pickupName}
-        />
+        <div className="map-stage">
+          <ZoomMap
+            view={view}
+            origin="Semarang"
+            destination={mapDestinationName}
+            armada={armada}
+            date={effectiveDate}
+            pickupId={mapPickupId}
+            pickupName={mapPickupName}
+          />
+        </div>
+        {view === 'island' ? (
+          <span className="java-note">Batas provinsi · peta ilustrasi</span>
+        ) : null}
         <button type="button" className="map-back" onClick={goBack} aria-label="Kembali">
           <ChevronLeftIcon />
         </button>
         <span className="map-count">
           <i aria-hidden="true" />
-          {loading ? 'mencari…' : `${armada.length} armada`}
+          {loading
+            ? 'mencari…'
+            : view === 'island'
+              ? 'Pulau Jawa'
+              : view === 'street'
+                ? 'Detail kampus'
+                : `${armada.length} armada`}
         </span>
+        <div className="map-zoom">
+          <button
+            type="button"
+            onClick={zoomIn}
+            aria-label={
+              campusDetail
+                ? 'Perbesar peta ke detail kampus'
+                : 'Detail kampus belum tersedia di titik jemput ini'
+            }
+            disabled={view === 'street' || !campusDetail}
+          >
+            <span aria-hidden="true">+</span>
+          </button>
+          <button
+            type="button"
+            onClick={zoomOut}
+            aria-label="Perkecil peta"
+            disabled={view === 'island'}
+          >
+            <span aria-hidden="true">−</span>
+          </button>
+        </div>
+        <button
+          type="button"
+          className="map-toggle"
+          onClick={() => setView((prev) => (prev === 'island' ? 'local' : 'island'))}
+        >
+          {view === 'island' ? 'Lihat sekitar' : 'Lihat Pulau Jawa'}
+        </button>
       </div>
 
       <div className="armada-sheet">
@@ -169,35 +298,21 @@ export default function ArmadaMap() {
 
         <div className="armada-controls">
           <div className="form-row">
-            <label className="field">
+            <div className="field">
               <span>Tujuan</span>
-              <select
-                value={form.destination}
-                onChange={(event) => setForm((prev) => ({ ...prev, destination: event.target.value }))}
-              >
-                {locations.map((location) => (
-                  <option key={location.id} value={location.id}>
-                    {location.city}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <button type="button" className="field-select" onClick={openDestination}>
+                <span>{destinationName}</span>
+                <ChevronDownIcon width={16} height={16} />
+              </button>
+            </div>
 
-            <label className="field">
+            <div className="field">
               <span>Titik jemput</span>
-              <select
-                value={selectedPickup?.id ?? ''}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, pickupPointId: event.target.value }))
-                }
-              >
-                {pickupPoints.map((point) => (
-                  <option key={point.id} value={point.id}>
-                    {point.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <button type="button" className="field-select" onClick={openPickup}>
+                <span>{pickupShort}</span>
+                <ChevronDownIcon width={16} height={16} />
+              </button>
+            </div>
           </div>
 
           <div className="mode-toggle" role="tablist" aria-label="Waktu keberangkatan">
@@ -284,6 +399,90 @@ export default function ArmadaMap() {
           </>
         ) : null}
       </div>
+
+      {picker
+        ? createPortal(
+            <>
+              <button
+                type="button"
+                className="picker-backdrop"
+                aria-label="Tutup pilihan"
+                onClick={closePicker}
+              />
+              <div
+                className="picker-sheet"
+                role="dialog"
+                aria-modal="true"
+                aria-label={picker === 'destination' ? 'Pilih tujuan' : 'Pilih titik jemput'}
+              >
+                <div className="picker-head">
+                  <h3>{picker === 'destination' ? 'Mau ke mana?' : 'Jemput di mana?'}</h3>
+                  <button type="button" className="picker-close" onClick={closePicker}>
+                    Tutup
+                  </button>
+                </div>
+                <div className="picker-list" role="listbox" onMouseLeave={clearPreview}>
+                  {picker === 'destination'
+                    ? locations.map((location) => (
+                        <button
+                          key={location.id}
+                          type="button"
+                          role="option"
+                          aria-selected={form.destination === location.id}
+                          className={`picker-option${form.destination === location.id ? ' is-active' : ''}`}
+                          onClick={() => chooseDestination(location.id)}
+                          onMouseEnter={() =>
+                            setPreview((prev) => ({
+                              ...prev,
+                              dest: location.id,
+                            }))
+                          }
+                          onMouseLeave={() => setPreview((prev) => ({ ...prev, dest: null }))}
+                          onFocus={() =>
+                            setPreview((prev) => ({
+                              ...prev,
+                              dest: location.id,
+                            }))
+                          }
+                          onBlur={() => setPreview((prev) => ({ ...prev, dest: null }))}
+                        >
+                          <span>{location.city}</span>
+                          <small>{location.province}</small>
+                        </button>
+                      ))
+                    : pickupPoints.map((point) => (
+                        <button
+                          key={point.id}
+                          type="button"
+                          role="option"
+                          aria-selected={form.pickupPointId === point.id}
+                          className={`picker-option${form.pickupPointId === point.id ? ' is-active' : ''}`}
+                          onClick={() => choosePickup(point.id)}
+                          onMouseEnter={() =>
+                            setPreview((prev) => ({
+                              ...prev,
+                              pickup: point.id,
+                            }))
+                          }
+                          onMouseLeave={() => setPreview((prev) => ({ ...prev, pickup: null }))}
+                          onFocus={() =>
+                            setPreview((prev) => ({
+                              ...prev,
+                              pickup: point.id,
+                            }))
+                          }
+                          onBlur={() => setPreview((prev) => ({ ...prev, pickup: null }))}
+                        >
+                          <span>{point.name}</span>
+                          <small>{point.beforeDepartureMinutes} mnt sebelum berangkat</small>
+                        </button>
+                      ))}
+                </div>
+              </div>
+            </>,
+            document.body,
+          )
+        : null}
     </div>
   )
 }

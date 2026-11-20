@@ -1,5 +1,13 @@
 import { Link } from 'react-router-dom'
+import { cityRoads, cityWater } from '../osmSemarang.js'
 import { ArrowRightIcon, FleetIcon, PinIcon, WeatherIcon } from './Icons.jsx'
+
+// Bingkai peta Beranda: jalanan Kota Semarang dalam km (data OpenStreetMap),
+// dipusatkan di sekitar Simpang Lima–Kota Lama.
+const FRAME = { cx: 0.6, cy: 1.2, w: 5 }
+const FRAME_H = FRAME.w / 1.88
+const VIEWBOX = `${FRAME.cx - FRAME.w / 2} ${FRAME.cy - FRAME_H / 2} ${FRAME.w} ${FRAME_H}`
+const roadClasses = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']
 
 const cars = [
   { id: 'car-1', label: 'Hiace', top: '26%', left: '20%', delay: '0s' },
@@ -11,26 +19,25 @@ const cars = [
 export default function TravelMap({ weather, ctaTo = '/cari' }) {
   return (
     <section className="map-card" aria-label="Peta armada travel di sekitar Semarang">
-      <svg className="map-canvas" viewBox="0 0 400 220" preserveAspectRatio="none" aria-hidden="true">
-        <rect width="400" height="220" fill="#ece5d8" />
-        <rect x="-10" y="-10" width="150" height="86" rx="10" fill="#e2d8c8" />
-        <rect x="248" y="126" width="164" height="110" rx="10" fill="#e2d8c8" />
-        <rect x="120" y="182" width="54" height="30" rx="4" fill="#d8cdbb" />
-        <rect x="296" y="22" width="44" height="30" rx="4" fill="#d8cdbb" />
-        <circle cx="338" cy="74" r="34" fill="#c9dce2" opacity="0.85" />
-        <path d="M-20 172 C70 138 112 154 182 104 S318 46 422 74" stroke="#ffffff" strokeWidth="17" fill="none" />
-        <path
-          d="M-20 172 C70 138 112 154 182 104 S318 46 422 74"
-          stroke="#c0492b"
-          strokeWidth="3.5"
-          strokeDasharray="10 9"
-          fill="none"
-          opacity="0.75"
-        />
-        <path d="M58 -12 L88 232" stroke="#ffffff" strokeWidth="11" />
-        <path d="M228 -12 L208 232" stroke="#ffffff" strokeWidth="8" />
-        <path d="M-12 58 L412 84" stroke="#ffffff" strokeWidth="7" opacity="0.85" />
-        <path d="M-10 120 L410 138" stroke="#ffffff" strokeWidth="4" opacity="0.7" />
+      <svg
+        className="map-canvas"
+        viewBox={VIEWBOX}
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+      >
+        <rect x={FRAME.cx - 20} y={FRAME.cy - 20} width="60" height="60" fill="#fbf3e6" />
+        <path d={cityWater.sea} fill="#dfeaf0" />
+        <path d={cityWater.lakes} fill="#bcdae7" />
+        <path d={cityWater.rivers} className="r-river" />
+
+        {roadClasses.map((cls) => (
+          <path key={`c-${cls}`} d={cityRoads[cls] ?? ''} className={`r-casing r-${cls}`} />
+        ))}
+        {roadClasses.map((cls) => (
+          <path key={cls} d={cityRoads[cls] ?? ''} className={`r-fill r-${cls}`} />
+        ))}
+
+        <path d={cityRoads.motorway ?? ''} className="r-route" />
       </svg>
 
       <div className="map-top">
