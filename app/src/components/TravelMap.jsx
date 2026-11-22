@@ -6,11 +6,9 @@ import { gsap } from '../animations.js'
 import { cityRoads, cityWater } from '../osmSemarang.js'
 import { ArrowRightIcon, FleetIcon, PinIcon, WeatherIcon } from './Icons.jsx'
 
-// Bingkai peta Beranda: jalanan Kota Semarang dalam km (data OpenStreetMap),
-// dipusatkan di sekitar Simpang Lima–Kota Lama. Skala km/px dijaga tetap, jadi
-// saat kartu melebar peta menampilkan area lebih luas — bukan di-crop.
-const FRAME = { cx: 0.6, cy: 1.2 }
-const KM_PER_PX = 5 / 424
+// Bingkai peta Beranda = bingkai kota yang dipakai /armada. Isi snapshot
+// transisi jadi identik, sehingga pergantian ke halaman tujuan tidak melompat.
+const FRAME = cityFrameKm('SMG-1')
 const roadClasses = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']
 
 // Titik contoh diambil dari geometri jalan asli, jadi chip armada selalu
@@ -79,17 +77,6 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
     const shellRect = shell ? shell.getBoundingClientRect() : from
     const target = { x: shellRect.x, y: shellRect.y, w: shellRect.width, h: 370 }
 
-    const cam = { x: minX, y: minY, w: frameW, h: frameH }
-    const end = cityFrameKm('SMG-1')
-
-    let lastApply = 0
-    const apply = () => {
-      const now = performance.now()
-      if (now - lastApply < 16) return
-      lastApply = now
-      if (svg) svg.setAttribute('viewBox', `${cam.x} ${cam.y} ${cam.w} ${cam.h}`)
-    }
-
     if (reduced) {
       navigate(ctaTo, { state: { fromMapExpand: true } })
       return
@@ -119,31 +106,39 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
         onComplete: () => navigate(ctaTo, { state: { fromMapExpand: true } }),
       })
       .to(element, { x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: 0, duration: 0.66 }, 0)
-      .to(cam, { ...end, duration: 0.66, onUpdate: apply }, 0)
       .to('.map-chip, .map-car, .map-user, .map-bottom', { autoAlpha: 0, duration: 0.2 }, 0)
   }
 
-  const frameW = size.w * KM_PER_PX
-  const frameH = size.h * KM_PER_PX
-  const minX = FRAME.cx - frameW / 2
-  const minY = FRAME.cy - frameH / 2
-  const viewBox = `${minX} ${minY} ${frameW} ${frameH}`
+  // Kartu lebih pendek dari frame (aspect beda), jadi peta mengisi kotak
+  // dengan "slice": sebagian atas/bawah terpotong. Area yang benar-benar
+  // kelihatan dihitung supaya chip tetap jatuh di jalan yang tampak.
+  const frameW = FRAME.w
+  const frameH = FRAME.h
+  const frameAspect = frameW / frameH
+  const cardAspect = size.w / size.h
+  let visW = frameW
+  let visH = frameH
+  if (cardAspect > frameAspect) visW = frameH * cardAspect
+  else visH = frameW / cardAspect
+  const minX = FRAME.x + (frameW - visW) / 2
+  const minY = FRAME.y + (frameH - visH) / 2
+  const viewBox = `${FRAME.x} ${FRAME.y} ${frameW} ${frameH}`
 
   // Ambil titik-titik jalan yang masuk bingkai, lalu sebar 4 chip di atasnya.
   const candidates = parseRoadPoints(cityRoads.secondary ?? cityRoads.primary ?? '')
     .filter(
       ([x, y]) =>
-        x > minX + frameW * 0.12 &&
-        x < minX + frameW * 0.88 &&
-        y > minY + frameH * 0.18 &&
-        y < minY + frameH * 0.72,
+        x > minX + visW * 0.12 &&
+        x < minX + visW * 0.88 &&
+        y > minY + visH * 0.12 &&
+        y < minY + visH * 0.56,
     )
     .sort((a, b) => a[0] - b[0])
 
   // Buang titik yang terlalu berdekatan supaya chip tidak menumpuk.
   const spread = []
   for (const point of candidates) {
-    if (spread.every((other) => Math.hypot(other[0] - point[0], other[1] - point[1]) > frameW * 0.18)) {
+    if (spread.every((other) => Math.hypot(other[0] - point[0], other[1] - point[1]) > visW * 0.18)) {
       spread.push(point)
     }
   }
@@ -151,11 +146,13 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
   const picked = fleet.map((car, index) => {
     const point =
       spread[Math.floor(((index + 0.5) / fleet.length) * spread.length)] ??
-      (index === 0 ? [FRAME.cx, FRAME.cy] : [FRAME.cx + (index - 1.5) * 0.9, FRAME.cy - 0.35])
+      (index === 0
+        ? [minX + visW / 2, minY + visH / 2]
+        : [minX + visW / 2 + (index - 1.5) * visW * 0.18, minY + visH / 2 - visH * 0.1])
     return {
       ...car,
-      left: `${(((point[0] - minX) / frameW) * 100).toFixed(2)}%`,
-      top: `${(((point[1] - minY) / frameH) * 100).toFixed(2)}%`,
+      left: `${(((point[0] - minX) / visW) * 100).toFixed(2)}%`,
+      top: `${(((point[1] - minY) / visH) * 100).toFixed(2)}%`,
     }
   })
 
