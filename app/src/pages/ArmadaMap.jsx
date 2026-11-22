@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { clearMapMorph, getMapMorph } from '../mapTransition.js'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { getLocations, getNearby, getPickupPoints } from '../api.js'
 import { dateLong, rupiah, todayIso } from '../utils.js'
 import ZoomMap from '../components/ZoomMap.jsx'
@@ -16,8 +17,15 @@ import { gsap, useGSAP } from '../animations.js'
 
 export default function ArmadaMap() {
   const scope = useRef(null)
+  const stageRef = useRef(null)
+  const sheetRef = useRef(null)
+  const morph = useRef(getMapMorph())
   const [params] = useSearchParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  // Datang dari animasi melebar kartu Beranda: peta sudah fullscreen & frame
+  // sama, jadi cukup menu yang naik dari bawah.
+  const handoff = !!location.state?.fromMapExpand
 
   const initialDate = params.get('date') ?? todayIso()
   const [mode, setMode] = useState(initialDate === todayIso() ? 'now' : 'schedule')
@@ -158,8 +166,99 @@ export default function ArmadaMap() {
 
   const { contextSafe } = useGSAP(
     () => {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const stage = stageRef.current
+      const sheet = sheetRef.current
+      const from = morph.current?.rect
+
+      if (handoff && stage && sheet) {
+        // View Transition menahan snapshot peta lama ~0,52 s; halaman ini harus
+        // sudah "diam" saat itu supaya snapshot-nya bersih.
+        document.body.classList.add('is-map-morph')
+        gsap.set(sheet, { yPercent: 100, autoAlpha: 0 })
+        gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 0 })
+
+        const done = () => document.body.classList.remove('is-map-morph')
+
+        if (reduce) {
+          gsap.set(sheet, { yPercent: 0, autoAlpha: 1 })
+          gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 1 })
+          done()
+          return undefined
+        }
+
+        const timeline = gsap
+          .timeline({ defaults: { ease: 'power2.out' }, delay: 0.5, onComplete: done })
+          .to('.map-back, .map-count, .map-toggle', { autoAlpha: 1, duration: 0.26, stagger: 0.04 })
+          .to(sheet, { yPercent: 0, autoAlpha: 1, duration: 0.52 }, '-=0.16')
+          .from('.armada-controls', { opacity: 0, y: 8, duration: 0.3 }, '-=0.42')
+
+        return () => {
+          timeline.kill()
+          done()
+        }
+      }
+
+      // Morph dari kartu Beranda: posisi awal dipasang langsung di layout
+      // effect (sebelum paint) supaya tidak ada kilatan peta ukuran penuh.
+      if (stage && sheet && from) {
+        const rect = stage.getBoundingClientRect()
+        gsap.set(stage, {
+          transformOrigin: '0 0',
+          x: from.x - rect.x,
+          y: from.y - rect.y,
+          scaleX: from.width / rect.width,
+          scaleY: from.height / rect.height,
+          borderRadius: 22,
+        })
+        gsap.set(sheet, { yPercent: 100, autoAlpha: 0 })
+        gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 0 })
+
+        const finish = () => {
+          document.body.classList.remove('is-map-morph')
+          clearMapMorph()
+        }
+
+        if (reduce) {
+          gsap.set(stage, { clearProps: 'transform,borderRadius' })
+          gsap.set(sheet, { yPercent: 0, autoAlpha: 1 })
+          gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 1 })
+          finish()
+          return undefined
+        }
+
+        document.body.classList.add('is-map-morph')
+
+        const timeline = gsap
+          .timeline({ defaults: { ease: 'power2.out' } })
+          .to(stage, {
+            x: 0,
+            y: 0,
+            scaleX: 1,
+            scaleY: 1,
+            borderRadius: 0,
+            duration: 0.46,
+            clearProps: 'transform,borderRadius',
+          })
+          .to(
+            '.map-back, .map-count, .map-toggle',
+            { autoAlpha: 1, duration: 0.28, stagger: 0.04 },
+            '-=0.24',
+          )
+          .to(sheet, { yPercent: 0, autoAlpha: 1, duration: 0.44 }, '-=0.12')
+          .from('.armada-controls', { opacity: 0, y: 8, duration: 0.3 }, '-=0.4')
+          .add(finish)
+
+        return () => {
+          timeline.kill()
+          finish()
+        }
+      }
+
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
+        clearMapMorph()
+
         gsap
           .timeline({ defaults: { ease: 'power3.out' } })
           .from('.map-back, .map-count, .map-toggle', {
@@ -170,6 +269,8 @@ export default function ArmadaMap() {
           })
           .from('.armada-sheet', { yPercent: 22, opacity: 0, duration: 0.5 }, '-=0.35')
           .from('.armada-controls', { opacity: 0, y: 8, duration: 0.3 }, '-=0.3')
+
+        return undefined
       })
       return () => mm.revert()
     },
@@ -225,7 +326,7 @@ export default function ArmadaMap() {
   return (
     <div className="page armada-page" ref={scope}>
       <div className="armada-map-wrap">
-        <div className="map-stage">
+        <div className="map-stage" ref={stageRef}>
           <ZoomMap
             view={view}
             origin="Semarang"
@@ -234,6 +335,7 @@ export default function ArmadaMap() {
             date={effectiveDate}
             pickupId={mapPickupId}
             pickupName={mapPickupName}
+            startFrame={morph.current?.viewBox ?? null}
           />
         </div>
         {view === 'island' ? (
@@ -283,7 +385,7 @@ export default function ArmadaMap() {
         </button>
       </div>
 
-      <div className="armada-sheet">
+      <div className="armada-sheet" ref={sheetRef}>
         <span className="sheet-grip" aria-hidden="true" />
         <div className="armada-sheet-head">
           <div>

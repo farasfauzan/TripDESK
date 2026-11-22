@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getBookings, getLocations, getProfile, getPromos, getRoutes, getSchedules } from '../api.js'
 import { dateLong, dateShort, rupiah, todayIso } from '../utils.js'
+import { captureMapMorphFromDom } from '../mapTransition.js'
 import { weatherFor } from '../weather.js'
 import ScheduleCard from '../components/ScheduleCard.jsx'
 import TravelMap from '../components/TravelMap.jsx'
@@ -128,7 +129,14 @@ export default function Home() {
           {services.map((service) => {
             const Icon = service.icon
             return (
-              <Link className="service-item" to={service.to} key={service.label}>
+              <Link
+                className="service-item"
+                to={service.to}
+                key={service.label}
+                onClick={() => {
+                  if (service.to === '/armada') captureMapMorphFromDom()
+                }}
+              >
                 <span className="service-icon">
                   <Icon width={20} height={20} />
                 </span>

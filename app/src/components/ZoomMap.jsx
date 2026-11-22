@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { javaCities, javaLabels, javaProvinces } from '../javaMapData.js'
 import { KM_PER_UNIT, cityLabels, pickupKm } from '../semarangMapData.js'
@@ -115,13 +115,27 @@ export default function ZoomMap({
   date,
   pickupId = '',
   pickupName = 'titik jemput',
+  startFrame = null,
 }) {
   const root = useRef(null)
   const svgRef = useRef(null)
   const firstRun = useRef(true)
 
   const point = pointOf(pickupId)
-  const cam = useRef(view === 'island' ? { ...ISLAND } : cityCam(point))
+  // `startFrame` (km) dipakai saat peta melanjutkan kartu Beranda yang membesar.
+  const startCam = startFrame
+    ? {
+        x: SEMARANG[0] + startFrame.x / KM_PER_UNIT,
+        y: SEMARANG[1] + startFrame.y / KM_PER_UNIT,
+        w: startFrame.w / KM_PER_UNIT,
+        h: startFrame.h / KM_PER_UNIT,
+      }
+    : null
+  const cam = useRef(startCam ?? (view === 'island' ? { ...ISLAND } : cityCam(point)))
+  const morphStart = useRef(!!startCam)
+  // Layer kampus (~140 kB path) baru dipasang saat benar-benar dibutuhkan,
+  // supaya paint pertama halaman peta tidak berat.
+  const [streetMounted, setStreetMounted] = useState(view === 'street')
 
   const to = javaCities[destination] ?? javaCities.Jepara
   const [x2, y2] = to
@@ -160,6 +174,10 @@ export default function ZoomMap({
   const pickupChipWidth = 0.85 + pickup.length * 0.155
   const pickupStreetWidth = 0.07 + pickup.length * 0.021
 
+  useEffect(() => {
+    if (view === 'street') setStreetMounted(true)
+  }, [view])
+
   useGSAP(
     () => {
       const svg = svgRef.current
@@ -178,6 +196,13 @@ export default function ZoomMap({
       }
 
       gsap.killTweensOf([cam.current, '.zm-labels', '.zm-city', '.zm-street', '.zm-province'])
+
+      // Saat morph dari Beranda, samakan LOD lebih dulu supaya label pulau
+      // tidak sempat berkedip sebelum kamera turun.
+      if (morphStart.current) {
+        morphStart.current = false
+        syncLod()
+      }
 
       // Level sama: bisa jadi cuma titik jemput yang pindah. Samakan LOD
       // langsung (idempoten, aman untuk double-invoke) lalu geser kamera.
@@ -307,7 +332,8 @@ export default function ZoomMap({
           </g>
         </g>
 
-        {/* Level kampus — geometri OpenStreetMap */}
+        {/* Level kampus — geometri OpenStreetMap (dipasang saat perlu) */}
+        {streetMounted ? (
         <g className="zm-street">
           <g transform={KM_ART} aria-hidden="true">
             <path d={campusMap.green} className="r-green" />
@@ -375,6 +401,7 @@ export default function ZoomMap({
             </g>
           </g>
         </g>
+        ) : null}
 
         <g className="zm-labels" aria-hidden="true">
           <text x="44" y="82" className="java-sea-label">

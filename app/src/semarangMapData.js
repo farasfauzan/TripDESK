@@ -26,3 +26,14 @@ export const cityLabels = [
   { name: 'Jatingaleh', x: -0.2, y: 7.6, size: 'small' },
   { name: 'Gunungpati', x: -3.2, y: 11.6, size: 'small' },
 ]
+
+// Bingkai level kota dipakai bersama oleh peta /armada dan animasi melebar
+// dari kartu Beranda, supaya frame terakhirnya identik.
+export const CITY_FRAME_KM = { w: 14, aspect: 460 / 370 }
+
+export const cityFrameKm = (pickupId = 'SMG-1') => {
+  const point = pickupKm[pickupId] ?? pickupKm['SMG-1']
+  const w = CITY_FRAME_KM.w
+  const h = w / CITY_FRAME_KM.aspect
+  return { x: point.x - w / 2, y: point.y - h / 2, w, h }
+}

@@ -78,7 +78,13 @@ export default function Tracking() {
 
       {booking && view ? (
         <>
-          <TrackingMap label={view.chip} live={view.live} active={view.live} pointName={booking.pickupPoint.name} />
+          <TrackingMap
+            label={view.chip}
+            live={view.live}
+            active={view.live}
+            pointName={booking.pickupPoint.name}
+            pickupId={booking.pickupPoint.id}
+          />
 
           <div className="track-headline">
             <div>

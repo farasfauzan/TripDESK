@@ -110,6 +110,11 @@ img {
   animation: page-in 0.28s ease both;
 }
 
+/* Saat peta Beranda membesar jadi peta penuh, halaman muncul tanpa fade. */
+body.is-map-morph .page {
+  animation: none;
+}
+
 .page.detail {
   padding-bottom: 168px;
 }
@@ -247,6 +252,11 @@ h3 {
   isolation: isolate;
 }
 
+.map-card.is-expanding {
+  border-color: transparent;
+  box-shadow: none;
+}
+
 .map-canvas {
   position: absolute;
   inset: 0;
@@ -364,12 +374,25 @@ h3 {
   align-items: center;
   gap: 5px;
   padding: 8px 13px;
+  border: 0;
   border-radius: 999px;
   background: var(--brand);
   box-shadow: 0 6px 14px rgba(34, 60, 74, 0.28);
   color: #fff;
+  font: inherit;
   font-size: 11.5px;
   font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.map-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 9px 18px rgba(34, 60, 74, 0.32);
+}
+
+.map-cta:active {
+  transform: translateY(0);
 }
 
 /* ---------- Service grid ala Gojek ---------- */
@@ -3139,6 +3162,140 @@ h3 {
 
 .map-zoom button:disabled {
   opacity: 0.42;
+}
+
+/* ---------- Morph peta Beranda → /armada (View Transitions) ---------- */
+
+.map-card {
+  view-transition-name: tripdesk-map;
+}
+
+.map-stage {
+  view-transition-name: tripdesk-map;
+}
+
+/* Hanya petanya yang dianimasikan; isi halaman berganti di belakang. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-group(tripdesk-map) {
+  animation-duration: 0.52s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(tripdesk-map),
+::view-transition-new(tripdesk-map) {
+  animation-duration: 0.52s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  mix-blend-mode: normal;
+}
+
+/* ---------- Peta lacak (bingkai mengikuti koridor rute) ---------- */
+
+.track-map .r-fill,
+.track-map .r-casing {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.track-map .r-fill {
+  stroke: #ffffff;
+}
+
+.track-map .r-casing {
+  stroke: #dccdb4;
+}
+
+.track-map .r-fill.r-motorway {
+  stroke-width: 0.016;
+}
+.track-map .r-casing.r-motorway {
+  stroke-width: 0.024;
+}
+.track-map .r-fill.r-trunk {
+  stroke-width: 0.014;
+}
+.track-map .r-casing.r-trunk {
+  stroke-width: 0.021;
+}
+.track-map .r-fill.r-primary {
+  stroke-width: 0.012;
+}
+.track-map .r-casing.r-primary {
+  stroke-width: 0.018;
+}
+.track-map .r-fill.r-secondary {
+  stroke-width: 0.009;
+}
+.track-map .r-casing.r-secondary {
+  stroke-width: 0.014;
+}
+.track-map .r-fill.r-tertiary {
+  stroke-width: 0.0075;
+}
+.track-map .r-casing.r-tertiary {
+  stroke-width: 0.0115;
+}
+.track-map .r-fill.r-unclassified {
+  stroke-width: 0.006;
+}
+.track-map .r-casing.r-unclassified {
+  stroke-width: 0.0095;
+}
+.track-map .r-fill.r-residential {
+  stroke-width: 0.005;
+}
+.track-map .r-casing.r-residential {
+  stroke-width: 0.008;
+}
+.track-map .r-fill.r-living_street {
+  stroke-width: 0.0045;
+}
+.track-map .r-casing.r-living_street {
+  stroke-width: 0.0075;
+}
+.track-map .r-fill.r-service {
+  stroke-width: 0.0035;
+}
+.track-map .r-casing.r-service {
+  stroke-width: 0.006;
+}
+
+.track-map .r-river {
+  fill: none;
+  stroke: #a9cfdf;
+  stroke-width: 0.009;
+  stroke-linecap: round;
+}
+
+.track-route-base {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 0.026;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.track-route-line {
+  fill: none;
+  stroke: #c0492b;
+  stroke-width: 0.015;
+  stroke-dasharray: 0.034 0.028;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+
+.track-you {
+  fill: #223c4a;
+  font-size: 0.026px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: #fbf3e6;
+  stroke-width: 0.012px;
 }
 
 /* ---------- Peta Beranda (bingkai ~5 km, satuan km) ---------- */

@@ -18,6 +18,14 @@ const CITY_BBOX = '(-7.14,110.28,-6.87,110.56)'
 const CAMPUS_BBOX = '(-7.064,110.425,-7.039,110.453)'
 const CORE_BBOX = '(-7.058,110.4324,-7.0455,110.4452)'
 
+// Titik jemput (koordinat asli) untuk membangun koridor rute halaman lacak.
+const PICKUPS = [
+  { id: 'SMG-1', lat: -7.0517, lon: 110.4387 },
+  { id: 'SMG-2', lat: -7.064, lon: 110.416 },
+  { id: 'SMG-3', lat: -6.9885, lon: 110.422 },
+  { id: 'SMG-4', lat: -6.955, lon: 110.456 },
+]
+
 const ROAD_CLASSES = 'motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service'
 const CITY_CLASSES = 'motorway|trunk|primary|secondary|tertiary'
 const CAMPUS_CLASSES = 'motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service'
@@ -148,6 +156,67 @@ function coastToSea(elements, top) {
   return `M${d} L${fmt(pts[pts.length - 1][0], 2)} ${fmt(top, 2)} L${fmt(pts[0][0], 2)} ${fmt(top, 2)}Z`
 }
 
+// Cari ruas jalan terdekat dari tiap titik jemput, lalu ambil sisi terpanjang
+// yang berakhir tepat di titik itu. Dipakai sebagai koridor rute halaman lacak
+// supaya garis rute benar-benar mengikuti jalan.
+async function pickupRoute(pickup, data) {
+  const target = toKm(pickup.lon, pickup.lat)
+  let best = null
+
+  for (const element of data.elements) {
+    const geometry = geometryOf(element)
+    if (geometry.length < 3) continue
+
+    let index = 0
+    let nearest = Infinity
+    geometry.forEach((point, i) => {
+      const distance = Math.hypot(point[0] - target[0], point[1] - target[1])
+      if (distance < nearest) {
+        nearest = distance
+        index = i
+      }
+    })
+    if (nearest > 0.3) continue
+
+    const lengthBetween = (from, to) => {
+      let total = 0
+      for (let i = from; i < to; i += 1) {
+        total += Math.hypot(geometry[i + 1][0] - geometry[i][0], geometry[i + 1][1] - geometry[i][1])
+      }
+      return total
+    }
+    const left = lengthBetween(0, index)
+    const right = lengthBetween(index, geometry.length - 1)
+    if (!best || Math.max(left, right) > best.length) {
+      best = { geometry, index, left, right, length: Math.max(left, right) }
+    }
+  }
+
+  if (!best || best.length < 0.15) return null
+  const points =
+    best.left >= best.right
+      ? best.geometry.slice(0, best.index + 1)
+      : best.geometry.slice(best.index).reverse()
+
+  const xs = points.map((point) => point[0])
+  const ys = points.map((point) => point[1])
+
+  return {
+    d: `M${points.map(([x, y]) => `${fmt(x, 3)} ${fmt(y, 3)}`).join(' ')}`,
+    lengthKm: +best.length.toFixed(3),
+    end: points[points.length - 1].map((value) => +value.toFixed(3)),
+    bbox: [
+      +Math.min(...xs).toFixed(3),
+      +Math.min(...ys).toFixed(3),
+      +Math.max(...xs).toFixed(3),
+      +Math.max(...ys).toFixed(3),
+    ],
+  }
+}
+
+const pick = (data, filter) =>
+  data.elements.filter((element) => element.type === 'way' && (!filter || filter(element)))
+
 async function main() {
   console.log('→ kota: jalan utama')
   const cityRoads = await overpass(
@@ -174,12 +243,26 @@ async function main() {
     `[out:json][timeout:90];(node["amenity"~"^(university|college|hospital|school)$"]${CAMPUS_BBOX};node["leisure"="stadium"]${CAMPUS_BBOX};node["tourism"~"^(attraction|museum)$"]${CAMPUS_BBOX};way["amenity"~"^(university|hospital)$"]${CAMPUS_BBOX};);out geom;`,
   )
 
+  console.log('→ koridor & jalan lokal tiap titik jemput')
+  const pickupRoutes = {}
+  const pickupLocalRoads = {}
+  for (const pickup of PICKUPS) {
+    try {
+      const data = await overpass(
+        `[out:json][timeout:90];way(around:900,${pickup.lat},${pickup.lon})["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|living_street|service)$"];out geom;`,
+      )
+      const route = await pickupRoute(pickup, data)
+      if (route) pickupRoutes[pickup.id] = route
+      pickupLocalRoads[pickup.id] = groupByClass(pick(data), 0.006, 3)
+    } catch (error) {
+      console.warn(`   ${pickup.id} gagal: ${error.message}`)
+    }
+  }
+
   console.log('→ kampus: ruang terbuka & air')
   const campusArea = await overpass(
     `[out:json][timeout:90];(way["leisure"~"^(park|pitch|garden)$"]${CAMPUS_BBOX};way["landuse"~"^(grass|forest|meadow)$"]${CAMPUS_BBOX};way["waterway"~"^(river|canal)$"]${CAMPUS_BBOX};way["natural"="water"]${CAMPUS_BBOX};);out geom;`,
   )
-
-  const pick = (data, filter) => data.elements.filter((element) => element.type === 'way' && (!filter || filter(element)))
 
   const water = {
     rivers: toPath(
@@ -263,6 +346,10 @@ export const campusMap = ${JSON.stringify(campus, null, 0)}
 export const campusPois = ${JSON.stringify(campusPois, null, 0)}
 
 export const campusRoadLabels = ${JSON.stringify(campusRoadLabels, null, 0)}
+
+export const pickupRoutes = ${JSON.stringify(pickupRoutes, null, 0)}
+
+export const pickupLocalRoads = ${JSON.stringify(pickupLocalRoads, null, 0)}
 `
 
   writeFileSync(new URL('../src/osmSemarang.js', import.meta.url), output)
@@ -281,6 +368,16 @@ export const campusRoadLabels = ${JSON.stringify(campusRoadLabels, null, 0)}
   stat('kota air', water)
   stat('kampus', campus)
   console.log(`   kampus POI: ${campusPois.length} label, jalan: ${campusRoadLabels.length} nama`)
+  console.log(
+    `   jalan lokal: ${Object.entries(pickupLocalRoads)
+      .map(([id, roads]) => `${id}=${Math.round(sizeOf(roads) / 1024)}kB`)
+      .join(' ')}`,
+  )
+  console.log(
+    `   koridor: ${Object.entries(pickupRoutes)
+      .map(([id, route]) => `${id}=${Math.round(route.lengthKm * 1000)}m`)
+      .join(' ')}`,
+  )
 }
 
 main().catch((error) => {
