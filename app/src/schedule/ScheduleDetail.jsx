@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { getSchedule } from '../api.js'
-import { dateLong, durationText, rupiah, todayIso } from '../utils.js'
-import { ErrorBox, Loading } from '../components/State.jsx'
+import { getSchedule } from '../shared/api.js'
+import { dateLong, durationText, rupiah, todayIso } from '../shared/utils.js'
+import { ErrorBox, Loading } from '../shared/State.jsx'
 import {
   ArrowRightIcon,
   BusIcon,
@@ -10,7 +10,7 @@ import {
   ClockIcon,
   PinIcon,
   ShieldIcon,
-} from '../components/Icons.jsx'
+} from '../shared/Icons.jsx'
 
 export default function ScheduleDetail() {
   const { id } = useParams()

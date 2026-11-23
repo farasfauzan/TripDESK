@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getBookings } from '../api.js'
-import { dateShort, rupiah } from '../utils.js'
-import StatusPill from '../components/StatusPill.jsx'
-import { EmptyState, ErrorBox, Loading } from '../components/State.jsx'
-import { ArrowRightIcon, TicketIcon } from '../components/Icons.jsx'
+import { getBookings } from '../shared/api.js'
+import { dateShort, rupiah } from '../shared/utils.js'
+import StatusPill from './StatusPill.jsx'
+import { EmptyState, ErrorBox, Loading } from '../shared/State.jsx'
+import { ArrowRightIcon, TicketIcon } from '../shared/Icons.jsx'
 
 const filters = [
   { id: 'semua', label: 'Semua' },

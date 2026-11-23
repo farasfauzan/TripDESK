@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 590" width="100%" role="img" aria-label="Arsitektur Tripdesk">
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#c0492b"/></marker>
+  <marker id="arrowSoft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a2958a"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#f5f1e8"/>
+<text x="40" y="46" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="22" font-weight="800" fill="#201c17">Arsitektur Tripdesk</text>
+<text x="40" y="70" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="12.5" fill="#6b6259">PWA statis + REST API Express dengan penyimpanan JSON</text>
+<rect x="40" y="110" width="300" height="300" rx="18" fill="#fffdf9" stroke="#c0492b" stroke-width="1.6"/>
+<text x="60" y="144" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="800" fill="#c0492b">Klien — PWA React + Vite</text>
+<rect x="60" y="168" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="72" y="186" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">React Router (10 halaman)</text>
+<rect x="60" y="208" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="72" y="226" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">GSAP + ScrollTrigger</text>
+<rect x="60" y="248" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="72" y="266" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">Service worker tripdesk-v3</text>
+<rect x="60" y="288" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="72" y="306" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">Data peta OSM ter-bundle</text>
+<rect x="430" y="110" width="300" height="300" rx="18" fill="#fffdf9" stroke="#223c4a" stroke-width="1.6"/>
+<text x="450" y="144" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="800" fill="#223c4a">REST API — Express :4000</text>
+<rect x="450" y="168" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="462" y="186" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">GET /schedules · /nearby</text>
+<rect x="450" y="208" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="462" y="226" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">GET /routes · /locations</text>
+<rect x="450" y="248" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="462" y="266" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">POST /bookings · PATCH cancel</text>
+<rect x="450" y="288" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="462" y="306" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">GET /bookings · /profile</text>
+<rect x="820" y="110" width="300" height="300" rx="18" fill="#fffdf9" stroke="#a96b1c" stroke-width="1.6"/>
+<text x="840" y="144" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="800" fill="#a96b1c">Data</text>
+<rect x="840" y="168" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="852" y="186" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">Seed in-memory (data.js)</text>
+<rect x="840" y="208" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="852" y="226" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">bookings.json (runtime)</text>
+<rect x="840" y="248" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="852" y="266" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">demoSeats: hash jadwal+tanggal</text>
+<rect x="840" y="288" width="260" height="28" rx="8" fill="#fbf7ef" stroke="#d8cdbc"/>
+<text x="852" y="306" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11.5" fill="#201c17">Status diturunkan dari jam</text>
+<path d="M 340 240 L 424 240" stroke="#c0492b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="385" y="228" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="10.5" font-weight="600" fill="#6b6259">fetch /api/*</text>
+<path d="M 730 240 L 814 240" stroke="#c0492b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="775" y="228" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="10.5" font-weight="600" fill="#6b6259">baca / tulis</text>
+<rect x="40" y="470" width="240" height="56" rx="14" fill="#fbf7ef" stroke="#d8cdbc" stroke-width="1.5"/><text x="160" y="489.2" text-anchor="middle" dominant-baseline="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#201c17">OpenStreetMap</text><text x="160" y="506.8" text-anchor="middle" dominant-baseline="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#201c17">(Overpass API)</text>
+<rect x="330" y="470" width="240" height="56" rx="14" fill="#fbf7ef" stroke="#d8cdbc" stroke-width="1.5"/><text x="450" y="498.0" text-anchor="middle" dominant-baseline="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#201c17">scripts/fetch-osm.mjs</text>
+<rect x="620" y="470" width="260" height="56" rx="14" fill="#fbf7ef" stroke="#d8cdbc" stroke-width="1.5"/><text x="750" y="498.0" text-anchor="middle" dominant-baseline="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="13" font-weight="600" fill="#201c17">src/map/osmSemarang.js</text>
+<path d="M 280 498 L 324 498" stroke="#a2958a" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#arrowSoft)"/>
+<path d="M 570 498 L 614 498" stroke="#a2958a" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#arrowSoft)"/>
+<text x="920" y="490" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#6b6259">sekali jalan,</text>
+<text x="920" y="506" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#6b6259">hasilnya di-commit</text>
+<path d="M 750 470 L 750.0 452.0 Q 750 440 738.0 440.0 L 212.0 440.0 Q 200 440 200.0 428.0 L 200 410" fill="none" stroke="#a2958a" stroke-width="1.5" stroke-dasharray="5 5" marker-end="url(#arrowSoft)"/>
+<text x="470" y="432" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="10.5" fill="#6b6259">di-bundle saat build</text>
+</svg>

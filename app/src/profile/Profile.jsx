@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getProfile } from '../api.js'
-import { formatDate, initials, rupiah } from '../utils.js'
-import { ErrorBox, Loading } from '../components/State.jsx'
+import { getProfile } from '../shared/api.js'
+import { formatDate, initials, rupiah } from '../shared/utils.js'
+import { ErrorBox, Loading } from '../shared/State.jsx'
 import {
   ChevronRightIcon,
   InfoIcon,
@@ -11,7 +11,7 @@ import {
   PinIcon,
   TicketIcon,
   WalletIcon,
-} from '../components/Icons.jsx'
+} from '../shared/Icons.jsx'
 
 const menus = [
   { id: 'about', label: 'Tentang aplikasi', hint: 'Versi, teknologi, dan pembuat', to: '/tentang', icon: InfoIcon },

@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { getLocations, getPickupPoints, getSchedules } from '../api.js'
-import { dateLong, todayIso } from '../utils.js'
-import ScheduleCard from '../components/ScheduleCard.jsx'
-import { EmptyState, ErrorBox, Loading } from '../components/State.jsx'
-import { CalendarIcon, SearchIcon, SwapIcon } from '../components/Icons.jsx'
+import { getLocations, getPickupPoints, getSchedules } from '../shared/api.js'
+import { dateLong, todayIso } from '../shared/utils.js'
+import ScheduleCard from '../schedule/ScheduleCard.jsx'
+import { EmptyState, ErrorBox, Loading } from '../shared/State.jsx'
+import { CalendarIcon, SearchIcon, SwapIcon } from '../shared/Icons.jsx'
 
 export default function Search() {
   const [params, setParams] = useSearchParams()

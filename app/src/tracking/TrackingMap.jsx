@@ -1,5 +1,5 @@
-import { cityRoads, cityWater, pickupLocalRoads, pickupRoutes } from '../osmSemarang.js'
-import { pickupKm } from '../semarangMapData.js'
+import { cityRoads, cityWater, pickupLocalRoads, pickupRoutes } from '../map/osmSemarang.js'
+import { pickupKm } from '../map/semarangMapData.js'
 
 const STAGE_RATIO = 424 / 212
 const roadClasses = [

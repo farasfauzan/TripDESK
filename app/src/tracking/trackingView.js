@@ -1,4 +1,4 @@
-import { dateLong } from './utils.js'
+import { dateLong } from '../shared/utils.js'
 
 const isoOf = (date) => {
   const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)

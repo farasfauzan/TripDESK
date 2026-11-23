@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { getBooking } from '../api.js'
-import { dateLong } from '../utils.js'
-import { buildTrackingSteps, buildTrackingView } from '../trackingView.js'
-import { gsap, useGSAP } from '../animations.js'
-import TrackingMap from '../components/TrackingMap.jsx'
-import { ErrorBox, Loading } from '../components/State.jsx'
-import { ArrowRightIcon, CheckIcon, ChevronLeftIcon, ClockIcon, TicketIcon } from '../components/Icons.jsx'
+import { getBooking } from '../shared/api.js'
+import { dateLong } from '../shared/utils.js'
+import { buildTrackingSteps, buildTrackingView } from './trackingView.js'
+import { gsap, useGSAP } from '../shared/animations.js'
+import TrackingMap from './TrackingMap.jsx'
+import { ErrorBox, Loading } from '../shared/State.jsx'
+import { ArrowRightIcon, CheckIcon, ChevronLeftIcon, ClockIcon, TicketIcon } from '../shared/Icons.jsx'
 
 export default function Tracking() {
   const { code } = useParams()

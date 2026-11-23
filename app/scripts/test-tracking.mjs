@@ -1,4 +1,4 @@
-import { buildTrackingView, buildTrackingSteps } from '../src/trackingView.js'
+import { buildTrackingView, buildTrackingSteps } from '../src/tracking/trackingView.js'
 
 const base = {
   code: 'TD-TEST',

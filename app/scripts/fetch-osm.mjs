@@ -1,7 +1,7 @@
 // Ambil geometri asli dari OpenStreetMap (Overpass) lalu ubah ke km relatif
 // terhadap pusat Semarang. Jalankan manual saat data perlu diperbarui:
 //   node scripts/fetch-osm.mjs
-// Hasilnya: src/osmSemarang.js (jangan diedit tangan).
+// Hasilnya: src/map/osmSemarang.js (jangan diedit tangan).
 import { writeFileSync } from 'node:fs'
 
 const ENDPOINTS = [
@@ -352,7 +352,7 @@ export const pickupRoutes = ${JSON.stringify(pickupRoutes, null, 0)}
 export const pickupLocalRoads = ${JSON.stringify(pickupLocalRoads, null, 0)}
 `
 
-  writeFileSync(new URL('../src/osmSemarang.js', import.meta.url), output)
+  writeFileSync(new URL('../src/map/osmSemarang.js', import.meta.url), output)
 
   const size = Buffer.byteLength(output)
   const sizeOf = (value) =>
@@ -363,7 +363,7 @@ export const pickupLocalRoads = ${JSON.stringify(pickupLocalRoads, null, 0)}
         .map(([k, v]) => `${k}=${Math.round(sizeOf(v) / 1024)}kB`)
         .join(' ')}`,
     )
-  console.log(`✓ src/osmSemarang.js ${Math.round(size / 1024)} kB`)
+  console.log(`✓ src/map/osmSemarang.js ${Math.round(size / 1024)} kB`)
   stat('kota jalan', groupByClass(pick(cityRoads), 0.025, 2))
   stat('kota air', water)
   stat('kampus', campus)

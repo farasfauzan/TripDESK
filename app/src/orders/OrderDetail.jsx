@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { cancelBooking, getBooking } from '../api.js'
-import { dateLong, rupiah } from '../utils.js'
-import StatusPill from '../components/StatusPill.jsx'
-import { ErrorBox, Loading } from '../components/State.jsx'
+import { cancelBooking, getBooking } from '../shared/api.js'
+import { dateLong, rupiah } from '../shared/utils.js'
+import StatusPill from './StatusPill.jsx'
+import { ErrorBox, Loading } from '../shared/State.jsx'
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -11,7 +11,7 @@ import {
   CopyIcon,
   PinIcon,
   UserIcon,
-} from '../components/Icons.jsx'
+} from '../shared/Icons.jsx'
 
 export default function OrderDetail() {
   const { code } = useParams()

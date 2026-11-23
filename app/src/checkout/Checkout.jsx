@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { createBooking, getProfile, getSchedule } from '../api.js'
-import { dateLong, rupiah, todayIso } from '../utils.js'
-import { ErrorBox, Loading } from '../components/State.jsx'
-import { CheckIcon, ChevronLeftIcon, PinIcon, TicketIcon } from '../components/Icons.jsx'
+import { createBooking, getProfile, getSchedule } from '../shared/api.js'
+import { dateLong, rupiah, todayIso } from '../shared/utils.js'
+import { ErrorBox, Loading } from '../shared/State.jsx'
+import { CheckIcon, ChevronLeftIcon, PinIcon, TicketIcon } from '../shared/Icons.jsx'
 
 const MAX_SEATS = 6
 

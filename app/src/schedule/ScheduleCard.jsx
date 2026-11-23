@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { ArrowRightIcon } from './Icons.jsx'
-import { durationText, rupiah } from '../utils.js'
+import { ArrowRightIcon } from '../shared/Icons.jsx'
+import { durationText, rupiah } from '../shared/utils.js'
 
 export default function ScheduleCard({ schedule, date, pickupPointId = '' }) {
   const pickup = pickupPointId ? `&pickup=${pickupPointId}` : ''

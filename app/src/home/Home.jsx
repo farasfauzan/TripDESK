@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getBookings, getLocations, getProfile, getRoutes, getSchedules } from '../api.js'
-import { dateLong, dateShort, rupiah, todayIso } from '../utils.js'
-import { captureMapMorphFromDom } from '../mapTransition.js'
-import { weatherFor } from '../weather.js'
-import ScheduleCard from '../components/ScheduleCard.jsx'
-import TravelMap from '../components/TravelMap.jsx'
-import { gsap, useGSAP, useReveal } from '../animations.js'
-import { EmptyState, ErrorBox, Loading } from '../components/State.jsx'
+import { getBookings, getLocations, getProfile, getRoutes, getSchedules } from '../shared/api.js'
+import { dateLong, dateShort, rupiah, todayIso } from '../shared/utils.js'
+import { captureMapMorphFromDom } from '../map/mapTransition.js'
+import { weatherFor } from '../shared/weather.js'
+import ScheduleCard from '../schedule/ScheduleCard.jsx'
+import TravelMap from '../map/TravelMap.jsx'
+import { gsap, useGSAP, useReveal } from '../shared/animations.js'
+import { EmptyState, ErrorBox, Loading } from '../shared/State.jsx'
 import {
   ArrowRightIcon,
   BusIcon,
@@ -16,7 +16,7 @@ import {
   InfoIcon,
   TicketIcon,
   UserIcon,
-} from '../components/Icons.jsx'
+} from '../shared/Icons.jsx'
 
 const services = [
   { to: '/armada', label: 'Pesan travel', icon: BusIcon },

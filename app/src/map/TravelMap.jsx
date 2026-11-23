@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { cityFrameKm } from '../semarangMapData.js'
-import { gsap } from '../animations.js'
-import { cityRoads, cityWater } from '../osmSemarang.js'
-import { ArrowRightIcon, FleetIcon, PinIcon, WeatherIcon } from './Icons.jsx'
+import { cityFrameKm } from './semarangMapData.js'
+import { gsap } from '../shared/animations.js'
+import { cityRoads, cityWater } from './osmSemarang.js'
+import { ArrowRightIcon, FleetIcon, PinIcon, WeatherIcon } from '../shared/Icons.jsx'
 
 // Bingkai peta Beranda = bingkai kota yang dipakai /armada. Isi snapshot
 // transisi jadi identik, sehingga pergantian ke halaman tujuan tidak melompat.

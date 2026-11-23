@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { CheckIcon, ChevronLeftIcon } from '../components/Icons.jsx'
+import { CheckIcon, ChevronLeftIcon } from '../shared/Icons.jsx'
 
 const features = [
   'REST API buatan sendiri (Express)',

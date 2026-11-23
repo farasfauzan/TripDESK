@@ -4,7 +4,8 @@ Aplikasi pemesanan tiket **travel shuttle antarkota** — pencarian rute, jadwal
 
 Status: **skeleton berjalan** (API + UI + alur pemesanan end-to-end), sudah diunggah ke [GitHub](https://github.com/farasfauzan/TripDESK), belum terdeploy.
 
-- Pemilik: Faras Fauzan Attaqi — 21120124140119
+📘 Dokumentasi lengkap: [docs/APLIKASI.md](docs/APLIKASI.md) — arsitektur, API, model data, peta, PWA.
+
 
 ## Stack
 
@@ -14,6 +15,14 @@ Status: **skeleton berjalan** (API + UI + alur pemesanan end-to-end), sudah diun
 | Backend | Node.js, Express 4, REST API, penyimpanan JSON |
 | Data | Seed in-memory (`server/src/data.js`) + `server/data/bookings.json` untuk pesanan |
 
+## Alur & arsitektur
+
+![Alur pemesanan Tripdesk](docs/diagram-alur.svg)
+
+![Arsitektur Tripdesk](docs/diagram-arsitektur.svg)
+
+Diagram digambar manual di draw.io — sumbernya [docs/diagram.drawio](docs/diagram.drawio) (buka di [app.diagrams.net](https://app.diagrams.net)). Kalau diagram diubah, ekspor ulang SVG-nya dari draw.io (File → Export as → SVG) supaya README ikut berubah.
+
 ## Struktur
 
 ```
@@ -21,11 +30,20 @@ TripDESK/
 ├── app/                  # PWA React + Vite
 │   ├── public/           # manifest, ikon PNG/SVG, service worker
 │   └── src/
-│       ├── components/   # BottomNav, ScheduleCard, StatusPill, State, Icons
-│       ├── pages/        # Home, Search, ScheduleDetail, Checkout, Orders,
-│       │                 # OrderDetail, Profile, About, NotFound
-│       ├── api.js        # klien REST API
-│       ├── utils.js      # format rupiah/tanggal, status
+│       ├── home/         # beranda (peta kartu, layanan, rute favorit)
+│       ├── armada/       # peta armada + sheet pesan travel
+│       ├── map/          # mesin peta: ZoomMap, TravelMap, data OSM/kota
+│       ├── tracking/     # lacak armada: halaman, peta, trackingView
+│       ├── search/       # cari jadwal
+│       ├── schedule/     # detail jadwal + ScheduleCard
+│       ├── checkout/     # pemesanan + pilih kursi
+│       ├── orders/       # tiket saya, detail pesanan, StatusPill
+│       ├── profile/      # profil
+│       ├── about/        # tentang aplikasi
+│       ├── shared/       # api, utils, animations, weather, Icons,
+│       │                 # State, BottomNav, NotFound
+│       ├── App.jsx       # routing
+│       ├── main.jsx      # bootstrap + PWA
 │       └── styles.css    # design system kecil + layout mobile
 ├── server/               # REST API Express
 │   ├── src/
@@ -35,7 +53,12 @@ TripDESK/
 │   │   ├── app.js        # setup express
 │   │   └── routes/       # catalog.js, bookings.js, profile.js
 │   └── data/             # bookings.json (runtime, di-ignore git)
-└── docs/RENCANA.md       # rencana, mapping requirement, backlog
+└── docs/
+    ├── APLIKASI.md       # dokumentasi teknis: arsitektur, API, peta, PWA
+    ├── diagram.drawio    # sumber diagram (alur + arsitektur)
+    ├── diagram-alur.svg
+    ├── diagram-arsitektur.svg
+    └── RENCANA.md        # rencana, mapping requirement, backlog
 ```
 
 ## Menjalankan
@@ -151,4 +174,4 @@ Enam kasus: LIVE, armada tiba, dalam perjalanan, selesai, dibatalkan, dan dijadw
 - **API (Render/Railway/Fly.io)**: jalankan `server/`, start command `npm start`, set `PORT` bila diperlukan.
 - PWA harus diakses lewat HTTPS agar service worker dan install prompt aktif.
 
-Detail rencana dan backlog ada di [docs/RENCANA.md](docs/RENCANA.md).
+Detail teknis ada di [docs/APLIKASI.md](docs/APLIKASI.md); rencana dan backlog di [docs/RENCANA.md](docs/RENCANA.md).

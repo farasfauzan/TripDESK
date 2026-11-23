@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { clearMapMorph, getMapMorph } from '../mapTransition.js'
+import { clearMapMorph, getMapMorph } from '../map/mapTransition.js'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { getLocations, getNearby, getPickupPoints } from '../api.js'
-import { dateLong, rupiah, todayIso } from '../utils.js'
-import ZoomMap from '../components/ZoomMap.jsx'
-import { EmptyState, ErrorBox, Loading } from '../components/State.jsx'
+import { getLocations, getNearby, getPickupPoints } from '../shared/api.js'
+import { dateLong, rupiah, todayIso } from '../shared/utils.js'
+import ZoomMap from '../map/ZoomMap.jsx'
+import { EmptyState, ErrorBox, Loading } from '../shared/State.jsx'
 import {
   ArrowRightIcon,
   CalendarIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
   FleetIcon,
-} from '../components/Icons.jsx'
-import { gsap, useGSAP } from '../animations.js'
+} from '../shared/Icons.jsx'
+import { gsap, useGSAP } from '../shared/animations.js'
 
 export default function ArmadaMap() {
   const scope = useRef(null)

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { javaCities, javaLabels, javaProvinces } from '../javaMapData.js'
-import { KM_PER_UNIT, cityLabels, pickupKm } from '../semarangMapData.js'
+import { javaCities, javaLabels, javaProvinces } from './javaMapData.js'
+import { KM_PER_UNIT, cityLabels, pickupKm } from './semarangMapData.js'
 import {
   OSM_ATTRIBUTION,
   campusMap,
@@ -9,8 +9,8 @@ import {
   campusRoadLabels,
   cityRoads,
   cityWater,
-} from '../osmSemarang.js'
-import { gsap, useGSAP } from '../animations.js'
+} from './osmSemarang.js'
+import { gsap, useGSAP } from '../shared/animations.js'
 
 // Satu peta, satu sumbu koordinat. Zoom = viewBox yang menyempit, bukan dua
 // gambar yang saling ganti. Geometri kota & kampus berasal dari OpenStreetMap

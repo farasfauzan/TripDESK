@@ -1,4 +1,4 @@
-import { statusOf } from '../utils.js'
+import { statusOf } from '../shared/utils.js'
 
 export default function StatusPill({ status }) {
   const meta = statusOf(status)
