@@ -1,5 +1,5 @@
 // Service worker minimal: simpan app shell agar Tripdesk tetap terbuka saat offline.
-const CACHE = 'tripdesk-v2'
+const CACHE = 'tripdesk-v3'
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg']
 
 self.addEventListener('install', (event) => {

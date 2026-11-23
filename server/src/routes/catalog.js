@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { locations, pickupPointsByCity, promos, routes, schedules } from '../data.js'
+import { locations, pickupPointsByCity, routes, schedules } from '../data.js'
 import { seatMap } from '../store.js'
 import { isIsoDate, shiftTime, todayIso } from '../dates.js'
 import { etaForPickup, distanceForPickup } from '../eta.js'
@@ -75,10 +75,6 @@ router.get('/pickup-points', (req, res) => {
     beforeDepartureMinutes: point.offsetMinutes,
   }))
   res.json({ data, meta: { city: city.city } })
-})
-
-router.get('/promos', (_req, res) => {
-  res.json({ data: promos })
 })
 
 router.get('/routes', (req, res) => {

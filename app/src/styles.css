@@ -110,8 +110,10 @@ img {
   animation: page-in 0.28s ease both;
 }
 
-/* Saat peta Beranda membesar jadi peta penuh, halaman muncul tanpa fade. */
-body.is-map-morph .page {
+/* Peta yang datang dari morph Beranda sudah terlihat utuh di frame pertama,
+   jadi halamannya tidak ikut animasi page-in (kalau ikut, seluruh layar
+   memudar ~0,45 dtk setelah mendarat). */
+.page.no-enter {
   animation: none;
 }
 
@@ -244,9 +246,10 @@ h3 {
 .map-card {
   position: relative;
   height: 226px;
+  margin-inline: -18px;
   overflow: hidden;
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: 0;
   background: #e9f1eb;
   box-shadow: var(--shadow);
   isolation: isolate;
@@ -255,6 +258,16 @@ h3 {
 .map-card.is-expanding {
   border-color: transparent;
   box-shadow: none;
+}
+
+/* Raster peta 14 km di layar 2x/3x butuh ~230 ms kalau pakai anti-alias, dan
+   itu memotong animasi melebar di tengah. Tanpa AA frame tetap ~12 ms; bedanya
+   tidak terlihat karena kartu sedang bergerak penuh layar dan pikselnya rapat.
+   Di layar 1x biarkan AA menyala — di sana rasternya sudah cepat. */
+@media (min-resolution: 2dppx) {
+  .map-card.is-expanding .map-canvas {
+    shape-rendering: optimizeSpeed;
+  }
 }
 
 .map-canvas {
@@ -410,8 +423,18 @@ h3 {
 
 .service-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* 6 kolom + span 2 = tetap 3 tile per baris, tapi baris terakhir (5 layanan
+     setelah promo dihapus) bisa digeser ke tengah, tidak menyisakan lubang. */
+  grid-template-columns: repeat(6, 1fr);
   gap: 10px 4px;
+}
+
+.service-grid > * {
+  grid-column: span 2;
+}
+
+.service-grid > :nth-child(4) {
+  grid-column: 2 / span 2;
 }
 
 .service-item {
@@ -533,10 +556,6 @@ h3 {
 .now-note svg {
   flex: 0 0 auto;
   color: var(--brand-ink);
-}
-
-#promo {
-  scroll-margin-top: 16px;
 }
 
 .avatar {
@@ -785,61 +804,6 @@ h3 {
 
 .section-head h2 {
   font-size: 15.5px;
-}
-
-.hscroll {
-  display: grid;
-  grid-auto-columns: 78%;
-  grid-auto-flow: column;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-.hscroll::-webkit-scrollbar {
-  display: none;
-}
-
-.promo-card {
-  position: relative;
-  display: grid;
-  gap: 6px;
-  padding: 16px;
-  border-radius: 18px;
-  background:
-    radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
-    linear-gradient(150deg, #c0492b, #8a2f16);
-  color: #fff;
-  overflow: hidden;
-}
-
-.promo-card.tone-1 {
-  background:
-    radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.22), transparent 60%),
-    linear-gradient(150deg, #223c4a, #16262f);
-}
-
-.promo-card.tone-2 {
-  background:
-    radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.2), transparent 60%),
-    linear-gradient(150deg, #a96b1c, #7a4a10);
-}
-
-.promo-card p {
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 12px;
-}
-
-.promo-badge {
-  justify-self: start;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 .route-list {
@@ -1221,86 +1185,6 @@ h3 {
   color: var(--ink);
   font-size: 11px;
   font-weight: 700;
-}
-
-.promo-hero {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border-radius: 18px;
-  background: linear-gradient(150deg, #c0492b, #8a2f16);
-  color: #fff;
-}
-
-.promo-hero-icon {
-  display: grid;
-  flex: 0 0 auto;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.promo-hero p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 11.5px;
-}
-
-.promo-list {
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.promo-tile {
-  display: grid;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
-}
-
-.promo-tile-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.promo-tile-head h3 {
-  font-size: 14.5px;
-}
-
-.promo-tile > p {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.promo-code-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 9px 10px 9px 12px;
-  border: 1px dashed var(--line);
-  border-radius: 12px;
-  background: #fcf8f1;
-}
-
-.promo-code-row code {
-  color: var(--brand-ink);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
-.promo-tile .btn {
-  padding: 10px 12px;
-  font-size: 12px;
 }
 
 @media (max-width: 380px) {
@@ -2217,7 +2101,7 @@ h3 {
   left: 50%;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   width: 100%;
   max-width: 460px;
   padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
@@ -3164,32 +3048,13 @@ h3 {
   opacity: 0.42;
 }
 
-/* ---------- Morph peta Beranda → /armada (View Transitions) ---------- */
+/* ---------- Morph peta Beranda → /armada ---------- */
 
-.map-card {
-  view-transition-name: tripdesk-map;
-}
-
-.map-stage {
-  view-transition-name: tripdesk-map;
-}
-
-/* Hanya petanya yang dianimasikan; isi halaman berganti di belakang. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-
-::view-transition-group(tripdesk-map) {
-  animation-duration: 0.52s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-old(tripdesk-map),
-::view-transition-new(tripdesk-map) {
-  animation-duration: 0.52s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  mix-blend-mode: normal;
+/* Saat kartu melebar, sudut/kursor dibersihkan. */
+.map-card.is-expanding {
+  border-color: transparent;
+  box-shadow: none;
+  cursor: default;
 }
 
 /* ---------- Peta lacak (bingkai mengikuti koridor rute) ---------- */

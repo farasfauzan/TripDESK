@@ -21,10 +21,17 @@ const SEMARANG = javaCities.Semarang
 const STAGE_RATIO = 460 / 370
 const CITY_KM = 14 // lebar bingkai level kota: 5 km radius + napas
 const CAMPUS_KM = 1.6
-const CITY_W = CITY_KM / KM_PER_UNIT
-const CITY_H = CITY_W / STAGE_RATIO
+// Tinggi bingkai yang dipegang tetap, lebarnya mengikuti rasio panggung asli.
+// Kartu Beranda memakai `slice` pada bingkai 14 × 11,26 km, jadi di layar sempit
+// area yang benar-benar terlihat menyempit (mis. 11,87 km di panggung 390).
+// Kalau panggung ini tetap memakai rasio desain 460/370 dengan `meet`, ia
+// menampilkan 14 km penuh → skala peta melompat ~18% tepat saat serah-terima.
+const CITY_H = CITY_KM / STAGE_RATIO / KM_PER_UNIT
 const STREET_W = CAMPUS_KM / KM_PER_UNIT
 const STREET_H = STREET_W / STAGE_RATIO
+const stageRatioNow = () =>
+  typeof window === 'undefined' ? STAGE_RATIO : Math.min(window.innerWidth || 460, 460) / 370
+
 const KM_ART = `translate(${SEMARANG[0]} ${SEMARANG[1]}) scale(${1 / KM_PER_UNIT})`
 
 const SEA_FILL = '#dfeaf0'
@@ -56,7 +63,9 @@ const carSlots = [
 const shortName = (name) => name.replace(/\s*\(.*\)$/, '')
 
 const pointOf = (id) => {
-  const km = pickupKm[id] ?? pickupKm['SMG-3']
+  // Samakan default dengan pilihan awal ArmadaMap (SMG-1/Tembalang). Kalau
+  // jatuh ke titik lain, peta meluncur ~6 km tepat setelah halaman mendarat.
+  const km = pickupKm[id] ?? pickupKm['SMG-1']
   return {
     km,
     x: SEMARANG[0] + km.x / KM_PER_UNIT,
@@ -64,13 +73,13 @@ const pointOf = (id) => {
   }
 }
 
-const cityCam = (point) => ({
-  x: point.x - CITY_W / 2,
-  y: point.y - CITY_H / 2,
-  w: CITY_W,
-  h: CITY_H,
-})
+const cityCam = (point, ratio) => {
+  const w = CITY_H * ratio
+  return { x: point.x - w / 2, y: point.y - CITY_H / 2, w, h: CITY_H }
+}
 
+// Level kampus tetap memakai bingkai desain (1,6 km) — tidak ikut handoff, jadi
+// tidak perlu menyesuaikan rasio panggung.
 const streetCam = (point) => ({
   x: point.x - STREET_W / 2,
   y: point.y - STREET_H / 2,
@@ -115,27 +124,32 @@ export default function ZoomMap({
   date,
   pickupId = '',
   pickupName = 'titik jemput',
-  startFrame = null,
 }) {
   const root = useRef(null)
   const svgRef = useRef(null)
   const firstRun = useRef(true)
 
   const point = pointOf(pickupId)
-  // `startFrame` (km) dipakai saat peta melanjutkan kartu Beranda yang membesar.
-  const startCam = startFrame
-    ? {
-        x: SEMARANG[0] + startFrame.x / KM_PER_UNIT,
-        y: SEMARANG[1] + startFrame.y / KM_PER_UNIT,
-        w: startFrame.w / KM_PER_UNIT,
-        h: startFrame.h / KM_PER_UNIT,
-      }
-    : null
-  const cam = useRef(startCam ?? (view === 'island' ? { ...ISLAND } : cityCam(point)))
-  const morphStart = useRef(!!startCam)
+  // Rasio panggung asli (bukan 460/370) supaya area yang tampil sama dengan
+  // kartu Beranda pada lebar layar berapa pun.
+  const [ratio, setRatio] = useState(stageRatioNow)
+  const cam = useRef(view === 'island' ? { ...ISLAND } : cityCam(point, ratio))
   // Layer kampus (~140 kB path) baru dipasang saat benar-benar dibutuhkan,
   // supaya paint pertama halaman peta tidak berat.
   const [streetMounted, setStreetMounted] = useState(view === 'street')
+
+  useEffect(() => {
+    const el = root.current
+    if (!el || typeof ResizeObserver === 'undefined') return undefined
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      if (!width || !height) return
+      const next = width / height
+      setRatio((prev) => (Math.abs(next - prev) > 0.01 ? next : prev))
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const to = javaCities[destination] ?? javaCities.Jepara
   const [x2, y2] = to
@@ -164,7 +178,7 @@ export default function ZoomMap({
 
   // Label POI yang jatuh di pojok kanan-atas (tempat chip "Detail kampus" dan
   // tombol toggle) disembunyikan supaya tidak ketiban.
-  const frameTop = point.km.y - CAMPUS_KM / STAGE_RATIO / 2
+  const frameTop = point.km.y - (CAMPUS_KM / STAGE_RATIO) / 2
   const frameRight = point.km.x + CAMPUS_KM / 2
   const visiblePois = campusPois.filter(
     (poi) => !(poi.y < frameTop + 0.2 && poi.x > frameRight - 0.52),
@@ -184,7 +198,8 @@ export default function ZoomMap({
       if (!svg) return undefined
 
       const lod = LOD[view] ?? LOD.local
-      const target = view === 'island' ? ISLAND : view === 'street' ? streetCam(point) : cityCam(point)
+      const target =
+        view === 'island' ? ISLAND : view === 'street' ? streetCam(point) : cityCam(point, ratio)
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const apply = () => svg.setAttribute('viewBox', VIEWBOX(cam.current))
       const levelChanged = Math.abs(cam.current.w - target.w) > 0.01
@@ -196,13 +211,6 @@ export default function ZoomMap({
       }
 
       gsap.killTweensOf([cam.current, '.zm-labels', '.zm-city', '.zm-street', '.zm-province'])
-
-      // Saat morph dari Beranda, samakan LOD lebih dulu supaya label pulau
-      // tidak sempat berkedip sebelum kamera turun.
-      if (morphStart.current) {
-        morphStart.current = false
-        syncLod()
-      }
 
       // Level sama: bisa jadi cuma titik jemput yang pindah. Samakan LOD
       // langsung (idempoten, aman untuk double-invoke) lalu geser kamera.
@@ -230,7 +238,7 @@ export default function ZoomMap({
 
       return undefined
     },
-    { scope: root, dependencies: [view, pickupId] },
+    { scope: root, dependencies: [view, pickupId, ratio] },
   )
 
   return (

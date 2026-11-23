@@ -29,7 +29,7 @@ TripDESK/
 │       └── styles.css    # design system kecil + layout mobile
 ├── server/               # REST API Express
 │   ├── src/
-│   │   ├── data.js       # seed kota, rute, armada, jadwal, promo, profil
+│   │   ├── data.js       # seed kota, rute, armada, jadwal, profil
 │   │   ├── store.js      # pesanan + ketersediaan kursi
 │   │   ├── dates.js      # util tanggal ISO
 │   │   ├── app.js        # setup express
@@ -73,7 +73,6 @@ Saat deploy, set `VITE_API_URL` ke URL API publik (contoh `https://tripdesk-api.
 | GET | `/api/health` | Cek status API |
 | GET | `/api/locations` | Daftar kota asal/tujuan |
 | GET | `/api/pickup-points` | Titik jemput per kota asal, query `origin` |
-| GET | `/api/promos` | Promo beranda |
 | GET | `/api/routes` | Rute, filter `origin`, `destination`, `date` |
 | GET | `/api/routes/:id` | Detail rute + jadwalnya |
 | GET | `/api/schedules` | Daftar armada, filter `origin`, `destination`, `date`, `pickupPointId` (menambah `pickupTime`) |
@@ -103,9 +102,8 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 
 ## Halaman
 
-1. **Beranda** — sapaan ala Gojek, peta dummy + lokasi user + armada bergerak + badge cuaca demo, grid layanan, tombol **Pesan**, tiket berikutnya, promo, rute favorit.
+1. **Beranda** — sapaan ala Gojek, peta dummy + lokasi user + armada bergerak + badge cuaca demo, grid layanan, tombol **Pesan**, tiket berikutnya, rute favorit.
 2. **Peta armada** — satu peta kontinu (satu `<svg>`, satu sistem koordinat): zoom = `viewBox` yang menyempit, jadi tidak ada pertukaran frame. Tiga level LOD: **Pulau Jawa** (rute + batas provinsi) → **Kota Semarang** (14 km, radius 5 km + marker armada) → **Kampus Tembalang/UNDIP** (1,6 km, jalan + bangunan + nama jalan), dikendalikan tombol ＋/−. Pilih titik jemput → kamera bergeser ke titik itu; zoom kampus hanya tersedia di Tembalang.
-3. **Promo** — daftar voucher, salin kode, dan CTA pakai promo.
 4. **Cari travel** — daftar armada (list #1) dengan jam jemput sesuai titik pilihan.
 5. **Detail jadwal** — armada, fasilitas, titik jemput + jam jemput, titik turun, CTA pesan.
 6. **Pemesanan** — pilih kursi 2+2, opsi jadwal penjemputan (jam + titik), data penumpang, ringkasan harga.
@@ -120,7 +118,7 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 | # | Fitur | Implementasi | Status |
 | --- | --- | --- | --- |
 | 1 | REST API sendiri | Express, 12 endpoint, seed data sendiri | ✅ |
-| 2 | Bottom navigation | 4 tab: Beranda, Promo, Pesanan, Profil | ✅ |
+| 2 | Bottom navigation | 3 tab: Beranda, Pesanan, Profil | ✅ |
 | 3 | Halaman lengkap | 11 halaman + halaman 404 | ✅ |
 | 4 | Daftar + detail | Jadwal → detail jadwal; Pesanan → detail pesanan | ✅ |
 | 5 | Profil & tentang | `/profil` dan `/tentang` | ✅ |

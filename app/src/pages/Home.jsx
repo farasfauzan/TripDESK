@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getBookings, getLocations, getProfile, getPromos, getRoutes, getSchedules } from '../api.js'
+import { getBookings, getLocations, getProfile, getRoutes, getSchedules } from '../api.js'
 import { dateLong, dateShort, rupiah, todayIso } from '../utils.js'
 import { captureMapMorphFromDom } from '../mapTransition.js'
 import { weatherFor } from '../weather.js'
@@ -14,7 +14,6 @@ import {
   CalendarIcon,
   ChevronRightIcon,
   InfoIcon,
-  SparkIcon,
   TicketIcon,
   UserIcon,
 } from '../components/Icons.jsx'
@@ -23,7 +22,6 @@ const services = [
   { to: '/armada', label: 'Pesan travel', icon: BusIcon },
   { to: '/cari', label: 'Cek jadwal', icon: CalendarIcon },
   { to: '/pesanan', label: 'Tiket saya', icon: TicketIcon },
-  { to: '/promo', label: 'Promo', icon: SparkIcon },
   { to: '/tentang', label: 'Tentang', icon: InfoIcon },
   { to: '/profil', label: 'Akun', icon: UserIcon },
 ]
@@ -38,14 +36,13 @@ export default function Home() {
     const date = todayIso()
     Promise.all([
       getLocations(controller.signal),
-      getPromos(controller.signal),
       getRoutes({ origin: 'SMG', date }, controller.signal),
       getSchedules({ origin: 'SMG', date }, controller.signal),
       getProfile(controller.signal),
       getBookings({ status: 'terjadwal' }, controller.signal),
     ])
-      .then(([locations, promos, routes, schedules, profile, bookings]) => {
-        setData({ locations, promos, routes: routes.slice(0, 4), schedules, profile, bookings, date })
+      .then(([locations, routes, schedules, profile, bookings]) => {
+        setData({ locations, routes: routes.slice(0, 4), schedules, profile, bookings, date })
       })
       .catch((err) => {
         if (err.name !== 'AbortError') setError(err.message)
@@ -69,14 +66,6 @@ export default function Home() {
       if (!data) return
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.from('.promo-card', {
-          y: 18,
-          opacity: 0,
-          duration: 0.4,
-          ease: 'power2.out',
-          stagger: 0.07,
-          scrollTrigger: { trigger: '#promo', start: 'top 88%', once: true },
-        })
         gsap.from('.route-row', {
           y: 14,
           opacity: 0,
@@ -172,24 +161,6 @@ export default function Home() {
 
       {data ? (
         <>
-          <section className="section" id="promo">
-            <div className="section-head">
-              <h2>Promo buat kamu</h2>
-              <Link to="/promo" className="link-more">
-                Lihat semua <ChevronRightIcon width={16} height={16} />
-              </Link>
-            </div>
-            <div className="hscroll">
-              {data.promos.map((promo, index) => (
-                <article className={`promo-card tone-${index % 3}`} key={promo.id}>
-                  <span className="promo-badge">{promo.badge}</span>
-                  <h3>{promo.title}</h3>
-                  <p>{promo.description}</p>
-                </article>
-              ))}
-            </div>
-          </section>
-
           <section className="section">
             <div className="section-head">
               <h2>Rute favorit</h2>

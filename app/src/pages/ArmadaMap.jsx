@@ -26,6 +26,9 @@ export default function ArmadaMap() {
   // Datang dari animasi melebar kartu Beranda: peta sudah fullscreen & frame
   // sama, jadi cukup menu yang naik dari bawah.
   const handoff = !!location.state?.fromMapExpand
+  // Peta yang datang dari morph Beranda tidak boleh ikut animasi page-in:
+  // halamannya sudah terlihat utuh sejak frame pertama.
+  const noEnter = handoff || !!morph.current?.rect
 
   const initialDate = params.get('date') ?? todayIso()
   const [mode, setMode] = useState(initialDate === todayIso() ? 'now' : 'schedule')
@@ -172,31 +175,39 @@ export default function ArmadaMap() {
       const from = morph.current?.rect
 
       if (handoff && stage && sheet) {
-        // View Transition menahan snapshot peta lama ~0,52 s; halaman ini harus
-        // sudah "diam" saat itu supaya snapshot-nya bersih.
-        document.body.classList.add('is-map-morph')
-        gsap.set(sheet, { yPercent: 100, autoAlpha: 0 })
+        // Peta sudah fullscreen dengan frame sama. Panel menu jangan digeser
+        // dari bawah: 470 px kosong selama ~0,3 s terbaca sebagai halaman
+        // "patah". Panel langsung duduk, isinya yang naik halus.
+        gsap.set(sheet, { yPercent: 0, autoAlpha: 1 })
         gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 0 })
 
-        const done = () => document.body.classList.remove('is-map-morph')
-
         if (reduce) {
-          gsap.set(sheet, { yPercent: 0, autoAlpha: 1 })
           gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 1 })
-          done()
           return undefined
         }
 
+        // Tanpa onComplete: mencabut kelas morph setelah selesai membuat
+        // animasi page-in hidup lagi dan memudarkan seluruh halaman (~0,45 s
+        // setelah mendarat). Peta ini memakai .no-enter, jadi tidak pernah
+        // ikut fade.
         const timeline = gsap
-          .timeline({ defaults: { ease: 'power2.out' }, delay: 0.5, onComplete: done })
-          .to('.map-back, .map-count, .map-toggle', { autoAlpha: 1, duration: 0.26, stagger: 0.04 })
-          .to(sheet, { yPercent: 0, autoAlpha: 1, duration: 0.52 }, '-=0.16')
-          .from('.armada-controls', { opacity: 0, y: 8, duration: 0.3 }, '-=0.42')
+          .timeline({ defaults: { ease: 'power2.out' } })
+          .to('.map-back, .map-count, .map-toggle', { autoAlpha: 1, duration: 0.24, stagger: 0.035 }, 0)
+          // Label, cincin radius, dan penanda jemput juga jangan "nongol" satu
+          // frame: kartu Beranda tidak punya lapisan ini, jadi tanpa fade
+          // serah-terima terbaca sebagai kedipan.
+          .from(
+            '.zm-radius, .zm-user-label, .zm-city-name, .zm-city-place, .zm-pickup',
+            { opacity: 0, duration: 0.34, stagger: 0.02 },
+            0,
+          )
+          .from(
+            '.sheet-grip, .armada-sheet-head, .armada-controls',
+            { opacity: 0, y: 14, duration: 0.34, stagger: 0.05 },
+            0.02,
+          )
 
-        return () => {
-          timeline.kill()
-          done()
-        }
+        return () => timeline.kill()
       }
 
       // Morph dari kartu Beranda: posisi awal dipasang langsung di layout
@@ -214,10 +225,7 @@ export default function ArmadaMap() {
         gsap.set(sheet, { yPercent: 100, autoAlpha: 0 })
         gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 0 })
 
-        const finish = () => {
-          document.body.classList.remove('is-map-morph')
-          clearMapMorph()
-        }
+        const finish = () => clearMapMorph()
 
         if (reduce) {
           gsap.set(stage, { clearProps: 'transform,borderRadius' })
@@ -226,8 +234,6 @@ export default function ArmadaMap() {
           finish()
           return undefined
         }
-
-        document.body.classList.add('is-map-morph')
 
         const timeline = gsap
           .timeline({ defaults: { ease: 'power2.out' } })
@@ -324,9 +330,12 @@ export default function ArmadaMap() {
   )
 
   return (
-    <div className="page armada-page" ref={scope}>
+    <div className={`page armada-page${noEnter ? ' no-enter' : ''}`} ref={scope}>
       <div className="armada-map-wrap">
         <div className="map-stage" ref={stageRef}>
+          {/* Bingkai panggung dihitung dari rasionya sendiri, jadi area yang
+              tampil sudah sama dengan kartu Beranda saat melebar. Menurunkan
+              kamera dari frame Beranda justru memicu zoom ~18%. */}
           <ZoomMap
             view={view}
             origin="Semarang"
@@ -335,7 +344,6 @@ export default function ArmadaMap() {
             date={effectiveDate}
             pickupId={mapPickupId}
             pickupName={mapPickupName}
-            startFrame={morph.current?.viewBox ?? null}
           />
         </div>
         {view === 'island' ? (

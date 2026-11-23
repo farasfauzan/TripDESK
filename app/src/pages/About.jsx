@@ -3,8 +3,8 @@ import { CheckIcon, ChevronLeftIcon } from '../components/Icons.jsx'
 
 const features = [
   'REST API buatan sendiri (Express)',
-  'Bottom navigation bar 4 tab',
-  '11 halaman: beranda, peta armada, promo, cari, detail jadwal, pemesanan, pesanan, detail pesanan, lacak armada, profil, tentang',
+  'Bottom navigation bar 3 tab',
+  '10 halaman: beranda, peta armada, cari, detail jadwal, pemesanan, pesanan, detail pesanan, lacak armada, profil, tentang',
   '2 daftar utama dengan halaman detail: jadwal travel & pesanan',
   'Halaman profil dan tentang aplikasi',
   'Bisa dipasang sebagai PWA di layar utama',

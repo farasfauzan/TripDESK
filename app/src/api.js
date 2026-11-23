@@ -43,7 +43,6 @@ const query = (params) => {
 
 export const getLocations = (signal) => api('/locations', { signal })
 export const getPickupPoints = (origin, signal) => api(`/pickup-points${query({ origin })}`, { signal })
-export const getPromos = (signal) => api('/promos', { signal })
 export const getRoutes = (params = {}, signal) => api(`/routes${query(params)}`, { signal })
 export const getSchedules = (params = {}, signal) => api(`/schedules${query(params)}`, { signal })
 export const getNearby = (params = {}, signal) => api(`/nearby${query(params)}`, { signal })

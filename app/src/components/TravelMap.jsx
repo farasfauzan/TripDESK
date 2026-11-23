@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { flushSync } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { cityFrameKm } from '../semarangMapData.js'
 import { gsap } from '../animations.js'
@@ -9,6 +8,13 @@ import { ArrowRightIcon, FleetIcon, PinIcon, WeatherIcon } from './Icons.jsx'
 // Bingkai peta Beranda = bingkai kota yang dipakai /armada. Isi snapshot
 // transisi jadi identik, sehingga pergantian ke halaman tujuan tidak melompat.
 const FRAME = cityFrameKm('SMG-1')
+// Lebar bingkai mengikuti rasio panggung /armada (tinggi tetap). Tanpa ini,
+// kartu istirahat (rasio 1,67) memakai skala 27,7 px/km sementara kartunya
+// langsung jadi 370 px saat ditekan → peta snap zoom ~18% di frame pertama.
+const stageAspect = () =>
+  typeof window === 'undefined' ? 460 / 370 : Math.min(window.innerWidth || 460, 460) / 370
+const stageFrameW = FRAME.h * stageAspect()
+const FRAME_BOX = { x: FRAME.x + (FRAME.w - stageFrameW) / 2, y: FRAME.y, w: stageFrameW, h: FRAME.h }
 const roadClasses = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary']
 
 // Titik contoh diambil dari geometri jalan asli, jadi chip armada selalu
@@ -34,8 +40,13 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
   const card = useRef(null)
   const svgRef = useRef(null)
   const expanding = useRef(false)
+  // Penahan ruang selama morph: kartu keluar dari alur (position: fixed), jadi
+  // ruangnya harus diganti supaya konten di bawah tidak melompat naik.
+  const spacer = useRef(null)
   const navigate = useNavigate()
   const [size, setSize] = useState({ w: 424, h: 226 })
+
+  useEffect(() => () => spacer.current?.remove(), [])
 
   useEffect(() => {
     const element = card.current
@@ -59,19 +70,10 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
     expanding.current = true
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-    // View Transitions: browser menahan snapshot peta lama (kartu Beranda)
-    // sambil halaman /armada di-mount, lalu memorph-nya ke peta penuh.
-    // Hasilnya tanpa jeda mount sama sekali.
-    if (typeof document.startViewTransition === 'function' && !reduced) {
-      document.startViewTransition(() => {
-        flushSync(() => navigate(ctaTo, { state: { fromMapExpand: true } }))
-      })
-      return
-    }
-
-    // Fallback: kartu melebar di tempat (transform, composited).
+    // Kartu peta melebar dengan *clip reveal*: ukuran kotak langsung dipasang
+    // sebesar panggung /armada, lalu clip-path dibuka dari posisi kartu asli.
+    // Isi peta tidak pernah diskalakan/diregangkan, jadi tidak ada "jedug".
     const element = card.current
-    const svg = svgRef.current
     const from = element.getBoundingClientRect()
     const shell = element.closest('.app-shell')
     const shellRect = shell ? shell.getBoundingClientRect() : from
@@ -82,6 +84,18 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
       return
     }
 
+    const dy = Math.max(0, from.y - target.y)
+    const clipBottom = Math.max(0, target.h - from.height)
+
+    // Ganti ruang kartu di alur sebelum kartu diangkat jadi fixed, kalau tidak
+    // seluruh isi halaman di bawahnya melompat naik setinggi kartu (CLS 0,20).
+    const holder = document.createElement('div')
+    holder.setAttribute('aria-hidden', 'true')
+    holder.style.height = `${from.height}px`
+    holder.style.marginInline = '-18px'
+    element.parentNode?.insertBefore(holder, element)
+    spacer.current = holder
+
     Object.assign(element.style, {
       position: 'fixed',
       left: `${target.x}px`,
@@ -90,39 +104,41 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
       height: `${target.h}px`,
       margin: '0',
       zIndex: '60',
-      transformOrigin: '0 0',
+      willChange: 'transform, clip-path',
     })
     element.classList.add('is-expanding')
-    gsap.set(element, {
-      x: from.x - target.x,
-      y: from.y - target.y,
-      scaleX: from.width / target.w,
-      scaleY: from.height / target.h,
-    })
+
+    const state = { y: dy, clip: clipBottom, radius: 22 }
+    const render = () => {
+      element.style.transform = `translateY(${state.y}px)`
+      element.style.clipPath = `inset(0px 0px ${state.clip}px 0px round ${state.radius}px)`
+    }
+    render()
 
     gsap
       .timeline({
         defaults: { ease: 'power2.out' },
         onComplete: () => navigate(ctaTo, { state: { fromMapExpand: true } }),
       })
-      .to(element, { x: 0, y: 0, scaleX: 1, scaleY: 1, borderRadius: 0, duration: 0.66 }, 0)
-      .to('.map-chip, .map-car, .map-user, .map-bottom', { autoAlpha: 0, duration: 0.2 }, 0)
+      .to(state, { y: 0, clip: 0, radius: 0, duration: 0.55, onUpdate: render }, 0)
+      .to('.map-chip, .map-car, .map-user', { autoAlpha: 0, duration: 0.18 }, 0)
+      // Konten di bawah kartu (layanan, rute, jadwal) memudar sebelum pindah
+      // halaman. Tanpa ini, serah-terima = setengah layar berganti dalam satu
+      // frame — terukur 11x lonjakan diff dibanding frame gerak biasa.
+      .to('.page > *:not(.map-card), .map-bottom', { autoAlpha: 0, duration: 0.2 }, 0.33)
   }
 
-  // Kartu lebih pendek dari frame (aspect beda), jadi peta mengisi kotak
-  // dengan "slice": sebagian atas/bawah terpotong. Area yang benar-benar
-  // kelihatan dihitung supaya chip tetap jatuh di jalan yang tampak.
-  const frameW = FRAME.w
-  const frameH = FRAME.h
+  const frameW = FRAME_BOX.w
+  const frameH = FRAME_BOX.h
   const frameAspect = frameW / frameH
   const cardAspect = size.w / size.h
   let visW = frameW
   let visH = frameH
   if (cardAspect > frameAspect) visW = frameH * cardAspect
   else visH = frameW / cardAspect
-  const minX = FRAME.x + (frameW - visW) / 2
-  const minY = FRAME.y + (frameH - visH) / 2
-  const viewBox = `${FRAME.x} ${FRAME.y} ${frameW} ${frameH}`
+  const minX = FRAME_BOX.x + (frameW - visW) / 2
+  const minY = FRAME_BOX.y + (frameH - visH) / 2
+  const viewBox = `${FRAME_BOX.x} ${FRAME_BOX.y} ${frameW} ${frameH}`
 
   // Ambil titik-titik jalan yang masuk bingkai, lalu sebar 4 chip di atasnya.
   const candidates = parseRoadPoints(cityRoads.secondary ?? cityRoads.primary ?? '')

@@ -121,12 +121,6 @@ export const schedules = routeDefs.flatMap((def, routeIndex) =>
   }),
 )
 
-export const promos = [
-  { id: 'HEMAT10', title: 'Diskon 10% rute Jawa Tengah', description: 'Berlaku untuk pemesanan Senin–Kamis, maksimal potongan Rp15.000.', badge: 'Promo' },
-  { id: 'NEWUSER', title: 'Rp5.000 untuk pengguna baru', description: 'Otomatis terpakai pada pemesanan pertama.', badge: 'Baru' },
-  { id: 'JEMPUT', title: 'Gratis antar titik jemput', description: 'Penjemputan dalam kota Semarang tanpa biaya tambahan.', badge: 'Fasilitas' },
-]
-
 export const profile = {
   id: 'USR-001',
   name: 'Faras Fauzan Attaqi',

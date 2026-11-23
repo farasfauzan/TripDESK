@@ -28,7 +28,7 @@ Sumber: ketentuan tugas travel antarkota (7 poin).
 | # | Ketentuan | Implementasi di repo | Status |
 | --- | --- | --- | --- |
 | 1 | API sendiri sesuai Modul 1 | `server/` Express, endpoint katalog + transaksi, seed data sendiri | ✅ |
-| 2 | Bottom Navigation Bar | `app/src/components/BottomNav.jsx`, 4 tab (Beranda, Promo, Pesanan, Profil), active state | ✅ |
+| 2 | Bottom Navigation Bar | `app/src/components/BottomNav.jsx`, 3 tab (Beranda, Pesanan, Profil), active state | ✅ |
 | 3 | Minimal 5 halaman | 11 halaman di `app/src/pages/` + 404 | ✅ |
 | 4 | 2 halaman list + detail | `/cari` → `/jadwal/:id`, `/pesanan` → `/pesanan/:code` | ✅ |
 | 5 | Profile/About | `/profil` dan `/tentang` | ✅ |
@@ -69,7 +69,7 @@ Keputusan teknis:
 
 ## 5. Scope skeleton (selesai)
 
-- Katalog kota, rute, jadwal, promo, profil.
+- Katalog kota, rute, jadwal, profil.
 - Pencarian berdasarkan asal, tujuan, tanggal.
 - Beranda bergaya Gojek: sapaan personal, peta dummy dengan armada bergerak, badge cuaca demo, grid layanan, kartu tiket berikutnya.
 - Detail jadwal dengan fasilitas, titik jemput + jam jemput, titik turun, sisa kursi.
@@ -81,10 +81,9 @@ Keputusan teknis:
 - ETA armada di kartu armada (deterministik, `server/src/eta.js`) dan halaman lacak armada dengan peta animasi + timeline.
 - Peta armada diperbesar (`/armada`): satu peta kontinu dengan zoom `viewBox` (bukan tukar frame), tiga level LOD — Pulau Jawa (rute + batas provinsi), Kota Semarang 14 km (jalan OpenStreetMap, radius 5 km, marker armada), dan Kampus Tembalang 1,6 km (jalan + bangunan + nama jalan). Tombol ＋/− menggeser level; ganti titik jemput → kamera bergeser ke titik itu.
 - Uji status pelacakan otomatis: `cd app && npm run test:tracking` (6 kasus).
-- Tab Promo: daftar voucher, salin kode, CTA pakai promo.
 - Halaman profil, tentang, 404.
 - PWA: manifest, ikon 192/512 + maskable, service worker app shell.
-- Micro-interaction GSAP: entrance Home, scroll reveal promo/rute/jadwal (ScrollTrigger), transisi peta armada, stagger kartu, dan timeline lacak; otomatis nonaktif saat `prefers-reduced-motion`.
+- Micro-interaction GSAP: entrance Home, scroll reveal rute/jadwal (ScrollTrigger), transisi peta armada, stagger kartu, dan timeline lacak; otomatis nonaktif saat `prefers-reduced-motion`.
 - Dokumentasi API dan requirement.
 
 ## 6. Backlog berikutnya (prioritas)
