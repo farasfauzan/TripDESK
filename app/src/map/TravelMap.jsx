@@ -181,7 +181,6 @@ export default function TravelMap({ weather, ctaTo = '/cari' }) {
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
       >
-        <rect x={FRAME.cx - 20} y={FRAME.cy - 20} width="60" height="60" fill="#fbf3e6" />
         <path d={cityWater.sea} fill="#dfeaf0" />
         <path d={cityWater.lakes} fill="#bcdae7" />
         <path d={cityWater.rivers} className="r-river" />

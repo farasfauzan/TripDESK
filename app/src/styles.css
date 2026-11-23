@@ -423,18 +423,8 @@ h3 {
 
 .service-grid {
   display: grid;
-  /* 6 kolom + span 2 = tetap 3 tile per baris, tapi baris terakhir (5 layanan
-     setelah promo dihapus) bisa digeser ke tengah, tidak menyisakan lubang. */
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px 4px;
-}
-
-.service-grid > * {
-  grid-column: span 2;
-}
-
-.service-grid > :nth-child(4) {
-  grid-column: 2 / span 2;
 }
 
 .service-item {

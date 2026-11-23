@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { clearMapMorph, getMapMorph } from '../map/mapTransition.js'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { getLocations, getNearby, getPickupPoints } from '../shared/api.js'
 import { dateLong, rupiah, todayIso } from '../shared/utils.js'
@@ -19,16 +18,15 @@ export default function ArmadaMap() {
   const scope = useRef(null)
   const stageRef = useRef(null)
   const sheetRef = useRef(null)
-  const morph = useRef(getMapMorph())
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
   // Datang dari animasi melebar kartu Beranda: peta sudah fullscreen & frame
   // sama, jadi cukup menu yang naik dari bawah.
   const handoff = !!location.state?.fromMapExpand
-  // Peta yang datang dari morph Beranda tidak boleh ikut animasi page-in:
-  // halamannya sudah terlihat utuh sejak frame pertama.
-  const noEnter = handoff || !!morph.current?.rect
+  // Peta yang datang dari animasi melebar kartu Beranda tidak boleh ikut
+  // animasi page-in: halamannya sudah terlihat utuh sejak frame pertama.
+  const noEnter = handoff
 
   const initialDate = params.get('date') ?? todayIso()
   const [mode, setMode] = useState(initialDate === todayIso() ? 'now' : 'schedule')
@@ -172,7 +170,6 @@ export default function ArmadaMap() {
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
       const stage = stageRef.current
       const sheet = sheetRef.current
-      const from = morph.current?.rect
 
       if (handoff && stage && sheet) {
         // Peta sudah fullscreen dengan frame sama. Panel menu jangan digeser
@@ -186,10 +183,8 @@ export default function ArmadaMap() {
           return undefined
         }
 
-        // Tanpa onComplete: mencabut kelas morph setelah selesai membuat
-        // animasi page-in hidup lagi dan memudarkan seluruh halaman (~0,45 s
-        // setelah mendarat). Peta ini memakai .no-enter, jadi tidak pernah
-        // ikut fade.
+        // Tidak ada onComplete: halaman ini memakai .no-enter, jadi animasi
+        // page-in tidak pernah hidup dan layar tidak memudar setelah mendarat.
         const timeline = gsap
           .timeline({ defaults: { ease: 'power2.out' } })
           .to('.map-back, .map-count, .map-toggle', { autoAlpha: 1, duration: 0.24, stagger: 0.035 }, 0)
@@ -210,61 +205,8 @@ export default function ArmadaMap() {
         return () => timeline.kill()
       }
 
-      // Morph dari kartu Beranda: posisi awal dipasang langsung di layout
-      // effect (sebelum paint) supaya tidak ada kilatan peta ukuran penuh.
-      if (stage && sheet && from) {
-        const rect = stage.getBoundingClientRect()
-        gsap.set(stage, {
-          transformOrigin: '0 0',
-          x: from.x - rect.x,
-          y: from.y - rect.y,
-          scaleX: from.width / rect.width,
-          scaleY: from.height / rect.height,
-          borderRadius: 22,
-        })
-        gsap.set(sheet, { yPercent: 100, autoAlpha: 0 })
-        gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 0 })
-
-        const finish = () => clearMapMorph()
-
-        if (reduce) {
-          gsap.set(stage, { clearProps: 'transform,borderRadius' })
-          gsap.set(sheet, { yPercent: 0, autoAlpha: 1 })
-          gsap.set('.map-back, .map-count, .map-toggle', { autoAlpha: 1 })
-          finish()
-          return undefined
-        }
-
-        const timeline = gsap
-          .timeline({ defaults: { ease: 'power2.out' } })
-          .to(stage, {
-            x: 0,
-            y: 0,
-            scaleX: 1,
-            scaleY: 1,
-            borderRadius: 0,
-            duration: 0.46,
-            clearProps: 'transform,borderRadius',
-          })
-          .to(
-            '.map-back, .map-count, .map-toggle',
-            { autoAlpha: 1, duration: 0.28, stagger: 0.04 },
-            '-=0.24',
-          )
-          .to(sheet, { yPercent: 0, autoAlpha: 1, duration: 0.44 }, '-=0.12')
-          .from('.armada-controls', { opacity: 0, y: 8, duration: 0.3 }, '-=0.4')
-          .add(finish)
-
-        return () => {
-          timeline.kill()
-          finish()
-        }
-      }
-
       const mm = gsap.matchMedia()
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        clearMapMorph()
-
         gsap
           .timeline({ defaults: { ease: 'power3.out' } })
           .from('.map-back, .map-count, .map-toggle', {

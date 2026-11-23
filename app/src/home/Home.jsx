@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getBookings, getLocations, getProfile, getRoutes, getSchedules } from '../shared/api.js'
 import { dateLong, dateShort, rupiah, todayIso } from '../shared/utils.js'
-import { captureMapMorphFromDom } from '../map/mapTransition.js'
 import { weatherFor } from '../shared/weather.js'
 import ScheduleCard from '../schedule/ScheduleCard.jsx'
 import TravelMap from '../map/TravelMap.jsx'
@@ -13,17 +12,12 @@ import {
   BusIcon,
   CalendarIcon,
   ChevronRightIcon,
-  InfoIcon,
   TicketIcon,
-  UserIcon,
 } from '../shared/Icons.jsx'
 
 const services = [
-  { to: '/armada', label: 'Pesan travel', icon: BusIcon },
   { to: '/cari', label: 'Cek jadwal', icon: CalendarIcon },
   { to: '/pesanan', label: 'Tiket saya', icon: TicketIcon },
-  { to: '/tentang', label: 'Tentang', icon: InfoIcon },
-  { to: '/profil', label: 'Akun', icon: UserIcon },
 ]
 
 export default function Home() {
@@ -118,14 +112,7 @@ export default function Home() {
           {services.map((service) => {
             const Icon = service.icon
             return (
-              <Link
-                className="service-item"
-                to={service.to}
-                key={service.label}
-                onClick={() => {
-                  if (service.to === '/armada') captureMapMorphFromDom()
-                }}
-              >
+              <Link className="service-item" to={service.to} key={service.label}>
                 <span className="service-icon">
                   <Icon width={20} height={20} />
                 </span>
