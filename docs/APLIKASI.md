@@ -98,7 +98,6 @@ Base: `http://localhost:4000/api`. Respons sukses `{ "data": … }`, gagal `{ "e
 | POST | `/bookings` | `scheduleId`, `date`, `seats[]`, `passenger{name,phone,email}`, `pickupPointId` | Buat pesanan → 201 |
 | PATCH | `/bookings/:code/cancel` | — | Batalkan; 409 kalau perjalanan sudah mulai |
 | DELETE | `/bookings/:code` | — | Hapus satu riwayat (hanya `selesai`/`dibatalkan`; 409 `TRIP_ACTIVE` kalau masih aktif) |
-| DELETE | `/bookings` | — | Bersihkan semua riwayat (selesai + dibatalkan), pesanan aktif tetap |
 | GET | `/profile` | — | Profil demo |
 
 Kode error: `INVALID_ORIGIN`, `INVALID_SCHEDULE`, `SCHEDULE_NOT_FOUND`, `INVALID_DATE`, `INVALID_SEATS`, `SEAT_TAKEN`, `INVALID_NAME`, `INVALID_PHONE`, `INVALID_PICKUP`, `ROUTE_NOT_FOUND`, `BOOKING_NOT_FOUND`, `ALREADY_CANCELLED`, `TRIP_ACTIVE`, `TRIP_STARTED`, `NOT_FOUND`, `INTERNAL_ERROR`.
@@ -120,9 +119,9 @@ berlangsung → sekarang >= tanggal + departTime
 terjadwal   → selain itu
 ```
 
-**Riwayat.** Pesanan `selesai`/`dibatalkan` bisa dihapus satu-satu (`DELETE /bookings/:code`) atau sekaligus (`DELETE /bookings`). Pesanan aktif (`terjadwal`/`berlangsung`) sengaja dilindungi 409 `TRIP_ACTIVE` karena kursinya masih terpakai.
+**Riwayat.** Pesanan `selesai`/`dibatalkan` dihapus satu per satu (`DELETE /bookings/:code`); UI mengulang untuk semua item riwayat. Tidak ada endpoint "hapus semua": tanpa autentikasi, satu endpoint seperti itu cukup satu perintah untuk mengosongkan database orang lain. Pesanan aktif (`terjadwal`/`berlangsung`) dilindungi 409 `TRIP_ACTIVE`.
 
-**Kursi.** Kursi "terjual" demo dibuat deterministik dari hash `scheduleId|date` (`demoSeats`) supaya tampilan konsisten tiap dibuka, lalu digabung dengan kursi pesanan nyata (`bookedSeats`). Satu pesanan maksimal 6 kursi; bentrok → 409 `SEAT_TAKEN`.
+**Kursi.** Dua lapis: tabel `booking_seats` (primary key `schedule_id, travel_date, seat`) menyimpan kursi yang benar-benar dipesan, sehingga dua permintaan bersamaan tidak bisa mengambil kursi yang sama — yang kalah ditolak database. Pesanan batal menghapus barisnya, jadi kursi langsung bebas. Kursi "terjual" demo dibuat deterministik dari hash `scheduleId|date` (`demoSeats`) supaya tampilan konsisten tiap dibuka, lalu digabung dengan kursi pesanan nyata (`bookedSeats`). Satu pesanan maksimal 6 kursi; bentrok → 409 `SEAT_TAKEN`.
 
 **Harga & ETA.** Harga per kursi dari seed; total = harga × jumlah kursi. ETA/jarak armada di `/nearby` adalah angka demo deterministik per titik jemput — bukan lalu lintas nyata.
 

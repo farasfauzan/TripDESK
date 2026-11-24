@@ -1,4 +1,4 @@
-import { query } from './db.js'
+import { pool, query } from './db.js'
 import { deriveStatus } from './bookingStatus.js'
 
 function hash(text) {
@@ -25,10 +25,10 @@ function demoSeats(scheduleId, date, total) {
 }
 
 export async function bookedSeats(scheduleId, date) {
+  // Kursi dipesan lewat tabel booking_seats; kursi pesanan yang dibatalkan
+  // dihapus dari tabel ini, jadi tidak perlu filter status di sini.
   const { rows } = await query(
-    `SELECT unnest(seats) AS seat
-       FROM bookings
-      WHERE schedule_id = $1 AND travel_date = $2::date AND status <> 'dibatalkan'`,
+    'SELECT seat FROM booking_seats WHERE schedule_id = $1 AND travel_date = $2::date',
     [scheduleId, date],
   )
   return new Set(rows.map((row) => Number(row.seat)))
@@ -55,27 +55,57 @@ export async function findBooking(code) {
 }
 
 export async function addBooking(booking) {
-  const values = [
-    booking.code,
-    booking.scheduleId,
-    booking.date,
-    booking.seats,
-    booking.status,
-    JSON.stringify(booking),
-    booking.createdAt,
-  ]
-  const sql = `INSERT INTO bookings (code, schedule_id, travel_date, seats, status, data, created_at)
-               VALUES ($1, $2, $3::date, $4::int[], $5, $6::jsonb, $7::timestamptz)`
+  const client = await pool.connect()
+  try {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await client.query('begin')
+      try {
+        const inserted = await client.query(
+          `INSERT INTO bookings (code, schedule_id, travel_date, seats, status, data, created_at)
+                VALUES ($1, $2, $3::date, $4::int[], $5, $6::jsonb, $7::timestamptz)
+           ON CONFLICT (code) DO NOTHING
+             RETURNING code`,
+          [booking.code, booking.scheduleId, booking.date, booking.seats, booking.status, booking, booking.createdAt],
+        )
 
-  // Kode dihasilkan acak; ulangi bila ada tabrakan dengan pesanan yang ada.
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const result = await query(sql, values)
-    if (result.rowCount === 1) return booking
-    booking.code = bookingCode()
-    values[0] = booking.code
-    values[5] = JSON.stringify(booking)
+        // Kode acak bisa bentrok; ulangi dengan kode baru.
+        if (inserted.rowCount === 0) {
+          await client.query('rollback')
+          booking.code = bookingCode()
+          continue
+        }
+
+        // Klaim kursi. Primary key (schedule_id, travel_date, seat) yang
+        // memutuskan: kalau ada yang sudah diambil, jumlahnya kurang.
+        const claim = await client.query(
+          `WITH ins AS (
+             INSERT INTO booking_seats (schedule_id, travel_date, seat, code)
+             SELECT $1, $2::date, s, $3 FROM unnest($4::int[]) AS s
+             ON CONFLICT DO NOTHING
+             RETURNING 1
+           )
+           SELECT count(*)::int AS n FROM ins`,
+          [booking.scheduleId, booking.date, booking.code, booking.seats],
+        )
+
+        if (claim.rows[0].n !== booking.seats.length) {
+          await client.query('rollback')
+          const error = new Error('Sebagian kursi sudah dipesan orang lain.')
+          error.code = 'SEAT_TAKEN'
+          throw error
+        }
+
+        await client.query('commit')
+        return booking
+      } catch (error) {
+        await client.query('rollback').catch(() => {})
+        throw error
+      }
+    }
+    throw new Error('Gagal membuat kode pesanan yang unik.')
+  } finally {
+    client.release()
   }
-  throw new Error('Gagal membuat kode pesanan yang unik.')
 }
 
 // Hapus satu pesanan. Yang masih aktif (terjadwal/berlangsung) tidak boleh
@@ -94,19 +124,11 @@ export async function cancelBooking(code) {
       RETURNING data`,
     [code],
   )
-  return rows[0]?.data ?? null
-}
+  if (!rows[0]) return null
 
-// Bersihkan riwayat: hanya selesai & dibatalkan yang dibuang.
-export async function removeHistory() {
-  const all = await listBookings()
-  const removable = all
-    .filter((booking) => !['terjadwal', 'berlangsung'].includes(deriveStatus(booking)))
-    .map((booking) => booking.code)
-  if (removable.length === 0) return 0
-
-  const { rowCount } = await query('DELETE FROM bookings WHERE code = ANY($1::text[])', [removable])
-  return rowCount
+  // Lepaskan kursi supaya bisa dipesan orang lain.
+  await query('DELETE FROM booking_seats WHERE lower(code) = lower($1)', [code])
+  return rows[0].data
 }
 
 export function bookingCode() {

@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { schedules } from '../data.js'
-import { addBooking, bookedSeats, bookingCode, cancelBooking, findBooking, listBookings, removeBooking, removeHistory } from '../store.js'
+import { addBooking, bookedSeats, bookingCode, cancelBooking, findBooking, listBookings, removeBooking } from '../store.js'
 import { hasDeparted, isIsoDate, shiftTime, todayIso } from '../dates.js'
 import { deriveStatus } from '../bookingStatus.js'
 import { etaForPickup } from '../eta.js'
@@ -99,7 +99,14 @@ router.post('/bookings', asyncHandler(async (req, res) => {
     createdAt: new Date().toISOString(),
   }
 
-  await addBooking(booking)
+  try {
+    await addBooking(booking)
+  } catch (error) {
+    if (error.code === 'SEAT_TAKEN') {
+      return res.status(409).json({ error: { code: 'SEAT_TAKEN', message: 'Sebagian kursi sudah dipesan orang lain.' } })
+    }
+    throw error
+  }
   res.status(201).json({ data: serialize(booking) })
 }))
 
@@ -135,10 +142,8 @@ router.delete('/bookings/:code', asyncHandler(async (req, res) => {
   res.json({ data: { code: booking.code, deleted: true } })
 }))
 
-// Bersihkan seluruh riwayat (selesai + dibatalkan). Pesanan aktif tetap disimpan.
-router.delete('/bookings', asyncHandler(async (_req, res) => {
-  const removed = await removeHistory()
-  res.json({ data: { removed } })
-}))
+// Catatan: tidak ada endpoint "hapus semua riwayat". Tanpa autentikasi, satu
+// endpoint seperti itu = satu perintah untuk mengosongkan database orang lain.
+// Klien menghapus riwayat satu per satu lewat DELETE /bookings/:code.
 
 export default router

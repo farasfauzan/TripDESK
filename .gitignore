@@ -5,8 +5,7 @@ node_modules/
 dist/
 build/
 
-# Runtime data (dibuat ulang otomatis)
-server/data/bookings.json
+# Runtime data (dulu file JSON, sekarang di Postgres/Neon)
 
 # Env & secret
 .env

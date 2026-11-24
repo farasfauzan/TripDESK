@@ -171,7 +171,7 @@ cd server && npm run migrate
 
 API lokal membaca `.env` lewat `dotenv`; di Vercel, daftarkan `DATABASE_URL` sebagai env var project. Kursi demo tetap deterministik dari `(jadwal, tanggal)`; kursi yang benar-benar dipesan dibaca dari tabel `bookings`.
 
-Untuk mengosongkan riwayat: `DELETE /api/bookings` (hanya pesanan selesai/dibatalkan). Reset penuh lewat SQL: `TRUNCATE bookings` di Neon SQL Editor. File `server/data/bookings.json` sudah tidak dipakai.
+Untuk mengosongkan riwayat, UI menghapus satu per satu lewat `DELETE /api/bookings/:code` (hanya pesanan selesai/dibatalkan) — tidak ada endpoint hapus-semua. Reset penuh lewat SQL: `TRUNCATE bookings, booking_seats` di Neon SQL Editor.
 
 ## Uji status pelacakan
 

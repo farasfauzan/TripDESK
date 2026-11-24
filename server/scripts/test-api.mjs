@@ -69,6 +69,29 @@ const freed = await call('GET', `/schedules/${schedule.id}?date=${date}`)
 assert.equal(freed.payload.data.seats.find((s) => s.no === seat).taken, false)
 console.log('PASS kursi kembali tersedia setelah dibatalkan')
 
+// Dua permintaan bersamaan untuk kursi yang sama: database harus menolak satu.
+const [raceA, raceB] = await Promise.all([
+  call('POST', '/bookings', {
+    scheduleId: schedule.id,
+    date,
+    seats: [seat],
+    passenger: { name: 'Balapan A', phone: '081234567890' },
+  }),
+  call('POST', '/bookings', {
+    scheduleId: schedule.id,
+    date,
+    seats: [seat],
+    passenger: { name: 'Balapan B', phone: '081234567890' },
+  }),
+])
+const raceStatuses = [raceA.response.status, raceB.response.status].sort()
+assert.deepEqual(raceStatuses, [201, 409], `harus 201 + 409, dapat ${raceStatuses.join(' + ')}`)
+const winner = raceA.response.status === 201 ? raceA : raceB
+console.log('PASS kursi yang sama tidak bisa dipesan dua kali (201 + 409)')
+
+await call('PATCH', `/bookings/${winner.payload.data.code}/cancel`)
+await call('DELETE', `/bookings/${winner.payload.data.code}`)
+
 const removed = await call('DELETE', `/bookings/${code}`)
 assert.equal(removed.response.status, 200)
 assert.equal(removed.payload.data.deleted, true)

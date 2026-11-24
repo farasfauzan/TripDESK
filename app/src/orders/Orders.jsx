@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { clearHistory as clearHistoryApi, getBookings } from '../shared/api.js'
+import { deleteBooking, getBookings } from '../shared/api.js'
 import { dateShort, rupiah } from '../shared/utils.js'
 import StatusPill from './StatusPill.jsx'
 import ConfirmDialog from '../shared/ConfirmDialog.jsx'
@@ -56,16 +56,23 @@ export default function Orders() {
   ).length
 
   const clearHistory = async () => {
-    if (!historyCount) return
+    const codes = bookings
+      .filter((booking) => booking.status === 'selesai' || booking.status === 'dibatalkan')
+      .map((booking) => booking.code)
+    if (!codes.length) return
+
     setConfirmOpen(false)
     setClearing(true)
     setError('')
     try {
-      const { removed } = await clearHistoryApi()
-      setBookings((prev) =>
-        prev.filter((booking) => booking.status !== 'selesai' && booking.status !== 'dibatalkan'),
-      )
-      setToast(removed ? `${removed} riwayat dihapus.` : 'Tidak ada riwayat yang perlu dihapus.')
+      // Tidak ada endpoint "hapus semua" (tanpa auth itu terlalu berbahaya),
+      // jadi riwayat dihapus satu per satu.
+      const results = await Promise.allSettled(codes.map((code) => deleteBooking(code)))
+      const removed = results.filter((result) => result.status === 'fulfilled').length
+      const failed = results.length - removed
+      setBookings((prev) => prev.filter((booking) => !codes.includes(booking.code)))
+      if (removed) setToast(`${removed} riwayat dihapus.`)
+      if (failed) setError(`${failed} riwayat gagal dihapus. Coba lagi.`)
     } catch (err) {
       setError(err.message)
     } finally {
