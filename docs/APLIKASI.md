@@ -3,7 +3,7 @@
 Aplikasi pemesanan tiket **travel shuttle antarkota**: cari jadwal, pilih titik jemput, pilih kursi, terbit e-tiket, lacak armada (demo), dan batalkan pesanan.
 
 - Frontend: React 18 + Vite (PWA), React Router 6, GSAP 3
-- Backend: Express 4, REST API, penyimpanan JSON
+- Backend: Express 4, REST API, Neon Lakebase Postgres (`pg`)
 - Peta: geometri OpenStreetMap (ODbL), digambar sebagai SVG — bukan tile, bukan GPS
 
 Dokumen ini menjelaskan cara aplikasi bekerja. Untuk rencana & backlog lihat [RENCANA.md](RENCANA.md). Sumber diagram: [diagram.drawio](diagram.drawio) (buka di [app.diagrams.net](https://app.diagrams.net)).
@@ -27,7 +27,7 @@ Jalur lain (garis putus-putus): **Cari jadwal** (`/cari`) masuk ke detail jadwal
 
 - **Klien** adalah SPA statis. Semua halaman memanggil REST API lewat `src/shared/api.js` (base URL `VITE_API_URL` atau `/api`). Data peta OSM sudah dibundel saat build, jadi peta tetap tampil tanpa jaringan.
 - **API** menyajikan katalog (kota, titik jemput, rute, jadwal), pencarian terdekat, pesanan, dan profil.
-- **Data**: katalog adalah seed in-memory di `server/src/data.js`; pesanan disimpan di `server/data/bookings.json` (runtime, tidak di-commit).
+- **Data**: katalog adalah seed in-memory di `server/src/data.js`; pesanan disimpan di tabel `bookings` pada Neon (`server/db/schema.sql`), bukan file JSON. `DATABASE_URL` (pooled) dipakai API, `DATABASE_URL_UNPOOLED` (direct) dipakai `npm run migrate`.
 - **Pipeline peta**: `scripts/fetch-osm.mjs` menarik geometri dari Overpass sekali, menulis `src/map/osmSemarang.js`, dan hasilnya di-commit — build tidak pernah menembak jaringan.
 
 ## 3. Struktur folder
@@ -186,7 +186,7 @@ Build frontend statis (Vite) dan API Express terpisah. Ada dua cara.
 
 1. **Project frontend**: Root Directory `app`, build `npm run build`, output `dist`, env `VITE_API_URL=https://<project-api>/api`.
 2. **Project API**: Root Directory `server`. Tidak perlu konfigurasi build — Vercel mendeteksi Express dari `src/app.js` (default export) atau `src/index.js` (`app.listen`), lalu menjalankan seluruh app sebagai satu Vercel Function. Semua route, validasi, dan bentuk respons sama dengan versi lokal. `server/vercel.json` mengarahkan `/` ke `/api/health` supaya domain API bisa dicek langsung.
-3. **Penyimpanan**: filesystem Vercel read-only, jadi `store.js` menulis ke `/tmp/tripdesk-data` saat env `VERCEL` ada. `POST /bookings` tetap 201, tetapi **data hilang saat instance baru/cold start**. Untuk data permanen, isi `TRIPDESK_DATA_DIR` ke disk persisten atau ganti store ke database.
+3. **Penyimpanan**: pesanan ada di Neon, jadi tidak bergantung pada filesystem Vercel yang read-only. Set `DATABASE_URL` di project Vercel; jalankan `npm run migrate` sekali dengan `DATABASE_URL_UNPOOLED` untuk membuat tabel. `store.js` memakai pool `pg` kecil dan `@vercel/functions` melakukan drain saat `VERCEL` terdeteksi.
 4. CORS sudah terbuka (`app.use(cors())`); batasi `origin` kalau perlu.
 
 Keduanya memakai Node 20+ (`server/package.json` → `engines`).

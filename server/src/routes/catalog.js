@@ -3,6 +3,7 @@ import { locations, pickupPointsByCity, routes, schedules } from '../data.js'
 import { seatMap } from '../store.js'
 import { hasDeparted, isIsoDate, shiftTime, todayIso } from '../dates.js'
 import { etaForPickup, distanceForPickup } from '../eta.js'
+import { asyncHandler } from '../asyncHandler.js'
 
 const router = Router()
 
@@ -25,8 +26,8 @@ const readDate = (req, res) => {
   return value
 }
 
-const toSummary = (schedule, date, pickup = null) => {
-  const { seatsLeft } = seatMap(schedule.id, date, schedule.seatLayout)
+const toSummary = async (schedule, date, pickup = null) => {
+  const { seatsLeft } = await seatMap(schedule.id, date, schedule.seatLayout)
   return {
     id: schedule.id,
     code: schedule.code,
@@ -77,21 +78,24 @@ router.get('/pickup-points', (req, res) => {
   res.json({ data, meta: { city: city.city } })
 })
 
-router.get('/routes', (req, res) => {
+router.get('/routes', asyncHandler(async (req, res) => {
   const origin = byCityOrId(req.query.origin)
   const destination = byCityOrId(req.query.destination)
   const date = readDate(req, res)
   if (!date) return
 
-  const data = routes
+  const data = await Promise.all(routes
     .filter((route) => (origin ? route.originId === origin.id : true))
     .filter((route) => (destination ? route.destinationId === destination.id : true))
-    .map((route) => {
+    .map(async (route) => {
       const routeSchedules = schedules
         .filter((s) => s.routeId === route.id)
         .filter((s) => !hasDeparted(s, date))
       const cheapest = routeSchedules.reduce((min, s) => Math.min(min, s.price), Number.POSITIVE_INFINITY)
-      const seatsLeft = routeSchedules.reduce((sum, s) => sum + seatMap(s.id, date, s.seatLayout).seatsLeft, 0)
+      const availability = await Promise.all(
+        routeSchedules.map((s) => seatMap(s.id, date, s.seatLayout)),
+      )
+      const seatsLeft = availability.reduce((sum, a) => sum + a.seatsLeft, 0)
       return {
         ...route,
         scheduleCount: routeSchedules.length,
@@ -100,25 +104,25 @@ router.get('/routes', (req, res) => {
         cheapestPrice: Number.isFinite(cheapest) ? cheapest : route.price,
         seatsLeft,
       }
-    })
+    }))
 
   res.json({ data, meta: { date, count: data.length } })
-})
+}))
 
-router.get('/routes/:id', (req, res) => {
+router.get('/routes/:id', asyncHandler(async (req, res) => {
   const route = routes.find((r) => r.id === req.params.id)
   if (!route) return res.status(404).json({ error: { code: 'ROUTE_NOT_FOUND', message: 'Rute tidak ditemukan.' } })
 
   const date = readDate(req, res)
   if (!date) return
-  const data = schedules
-    .filter((s) => s.routeId === route.id)
-    .map((s) => toSummary(s, date))
+  const data = await Promise.all(
+    schedules.filter((s) => s.routeId === route.id).map((s) => toSummary(s, date)),
+  )
 
   res.json({ data: { route, schedules: data }, meta: { date } })
-})
+}))
 
-router.get('/schedules', (req, res) => {
+router.get('/schedules', asyncHandler(async (req, res) => {
   const origin = byCityOrId(req.query.origin)
   const destination = byCityOrId(req.query.destination)
   const date = readDate(req, res)
@@ -126,11 +130,11 @@ router.get('/schedules', (req, res) => {
 
   const pickup = req.query.pickupPointId ? findPickupPoint(req.query.pickupPointId) : null
 
-  const data = schedules
+  const data = (await Promise.all(schedules
     .filter((s) => (origin ? s.originId === origin.id : true))
     .filter((s) => (destination ? s.destinationId === destination.id : true))
     .filter((s) => !hasDeparted(s, date))
-    .map((s) => toSummary(s, date, pickup?.cityId === s.originId ? pickup : null))
+    .map((s) => toSummary(s, date, pickup?.cityId === s.originId ? pickup : null))))
     .sort((a, b) => a.departTime.localeCompare(b.departTime))
 
   res.json({
@@ -143,9 +147,9 @@ router.get('/schedules', (req, res) => {
       pickupPoint: pickup ? { id: pickup.id, name: pickup.name } : null,
     },
   })
-})
+}))
 
-router.get('/nearby', (req, res) => {
+router.get('/nearby', asyncHandler(async (req, res) => {
   const origin = byCityOrId(req.query.origin ?? 'SMG')
   if (!origin) {
     return res.status(400).json({ error: { code: 'INVALID_ORIGIN', message: 'Kota asal tidak dikenal.' } })
@@ -163,14 +167,14 @@ router.get('/nearby', (req, res) => {
         ? { ...fallback, cityId: origin.id }
         : null
 
-  const data = schedules
+  const data = (await Promise.all(schedules
     .filter((schedule) => schedule.originId === origin.id)
     .filter((schedule) => !hasDeparted(schedule, date))
     .filter((schedule) => (destination ? schedule.destinationId === destination.id : true))
-    .map((schedule) => ({
-      ...toSummary(schedule, date, pickup),
+    .map(async (schedule) => ({
+      ...await toSummary(schedule, date, pickup),
       distanceKm: distanceForPickup(schedule.id, pickup?.id ?? 'none'),
-    }))
+    }))))
     .filter((schedule) => schedule.seatsLeft > 0 && schedule.distanceKm <= 5)
     .sort((a, b) => a.distanceKm - b.distanceKm || a.pickupEtaMinutes - b.pickupEtaMinutes)
 
@@ -185,14 +189,15 @@ router.get('/nearby', (req, res) => {
       count: data.length,
     },
   })
-})
+}))
 
-router.get('/schedules/:id', (req, res) => {  const schedule = schedules.find((s) => s.id === req.params.id)
+router.get('/schedules/:id', asyncHandler(async (req, res) => {
+  const schedule = schedules.find((s) => s.id === req.params.id)
   if (!schedule) return res.status(404).json({ error: { code: 'SCHEDULE_NOT_FOUND', message: 'Jadwal tidak ditemukan.' } })
 
   const date = readDate(req, res)
   if (!date) return
-  const availability = seatMap(schedule.id, date, schedule.seatLayout)
+  const availability = await seatMap(schedule.id, date, schedule.seatLayout)
 
   res.json({
     data: {
@@ -210,6 +215,6 @@ router.get('/schedules/:id', (req, res) => {  const schedule = schedules.find((s
         .sort((a, b) => a.pickupTime.localeCompare(b.pickupTime)),
     },
   })
-})
+}))
 
 export default router

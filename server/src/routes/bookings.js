@@ -1,9 +1,10 @@
 import { Router } from 'express'
 import { schedules } from '../data.js'
-import { addBooking, bookedSeats, bookingCode, findBooking, listBookings, persistBookings, removeBooking, removeHistory } from '../store.js'
+import { addBooking, bookedSeats, bookingCode, cancelBooking, findBooking, listBookings, removeBooking, removeHistory } from '../store.js'
 import { hasDeparted, isIsoDate, shiftTime, todayIso } from '../dates.js'
 import { deriveStatus } from '../bookingStatus.js'
 import { etaForPickup } from '../eta.js'
+import { asyncHandler } from '../asyncHandler.js'
 
 const router = Router()
 
@@ -13,21 +14,21 @@ const serialize = (booking) => ({
   seatLabels: booking.seats.map((no) => `Kursi ${no}`),
 })
 
-router.get('/bookings', (req, res) => {
+router.get('/bookings', asyncHandler(async (req, res) => {
   const status = req.query.status
-  const data = listBookings()
+  const data = (await listBookings())
     .map(serialize)
     .filter((b) => (status ? b.status === status : true))
   res.json({ data, meta: { count: data.length } })
-})
+}))
 
-router.get('/bookings/:code', (req, res) => {
-  const booking = findBooking(req.params.code)
+router.get('/bookings/:code', asyncHandler(async (req, res) => {
+  const booking = await findBooking(req.params.code)
   if (!booking) return res.status(404).json({ error: { code: 'BOOKING_NOT_FOUND', message: 'Pesanan tidak ditemukan.' } })
   res.json({ data: serialize(booking) })
-})
+}))
 
-router.post('/bookings', (req, res) => {
+router.post('/bookings', asyncHandler(async (req, res) => {
   const { scheduleId, date, seats, passenger, pickupPointId } = req.body ?? {}
 
   const schedule = schedules.find((s) => s.id === scheduleId)
@@ -53,7 +54,7 @@ router.post('/bookings', (req, res) => {
     return res.status(400).json({ error: { code: 'INVALID_SEATS', message: 'Nomor kursi di luar armada.' } })
   }
 
-  const taken = bookedSeats(schedule.id, date)
+  const taken = await bookedSeats(schedule.id, date)
   if (seatNumbers.some((no) => taken.has(no))) {
     return res.status(409).json({ error: { code: 'SEAT_TAKEN', message: 'Sebagian kursi sudah dipesan orang lain.' } })
   }
@@ -98,12 +99,12 @@ router.post('/bookings', (req, res) => {
     createdAt: new Date().toISOString(),
   }
 
-  addBooking(booking)
+  await addBooking(booking)
   res.status(201).json({ data: serialize(booking) })
-})
+}))
 
-router.patch('/bookings/:code/cancel', (req, res) => {
-  const booking = findBooking(req.params.code)
+router.patch('/bookings/:code/cancel', asyncHandler(async (req, res) => {
+  const booking = await findBooking(req.params.code)
   if (!booking) return res.status(404).json({ error: { code: 'BOOKING_NOT_FOUND', message: 'Pesanan tidak ditemukan.' } })
   const current = deriveStatus(booking)
   if (current === 'dibatalkan') {
@@ -114,14 +115,13 @@ router.patch('/bookings/:code/cancel', (req, res) => {
       error: { code: 'TRIP_STARTED', message: 'Perjalanan sudah dimulai, pesanan tidak bisa dibatalkan.' },
     })
   }
-  booking.status = 'dibatalkan'
-  persistBookings()
-  res.json({ data: serialize(booking) })
-})
+  const updated = await cancelBooking(booking.code)
+  res.json({ data: serialize(updated) })
+}))
 
 // Hapus satu pesanan dari riwayat. Pesanan aktif harus dibatalkan dulu.
-router.delete('/bookings/:code', (req, res) => {
-  const booking = findBooking(req.params.code)
+router.delete('/bookings/:code', asyncHandler(async (req, res) => {
+  const booking = await findBooking(req.params.code)
   if (!booking) return res.status(404).json({ error: { code: 'BOOKING_NOT_FOUND', message: 'Pesanan tidak ditemukan.' } })
 
   const current = deriveStatus(booking)
@@ -131,14 +131,14 @@ router.delete('/bookings/:code', (req, res) => {
     })
   }
 
-  removeBooking(booking.code)
+  await removeBooking(booking.code)
   res.json({ data: { code: booking.code, deleted: true } })
-})
+}))
 
 // Bersihkan seluruh riwayat (selesai + dibatalkan). Pesanan aktif tetap disimpan.
-router.delete('/bookings', (_req, res) => {
-  const removed = removeHistory()
+router.delete('/bookings', asyncHandler(async (_req, res) => {
+  const removed = await removeHistory()
   res.json({ data: { removed } })
-})
+}))
 
 export default router

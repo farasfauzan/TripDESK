@@ -12,8 +12,8 @@ Status: **skeleton berjalan** (API + UI + alur pemesanan end-to-end), sudah diun
 | Bagian | Teknologi |
 | --- | --- |
 | Frontend | React 18, React Router 6, Vite 6, GSAP 3 + ScrollTrigger (`@gsap/react`), CSS mobile-first, PWA (manifest + service worker) |
-| Backend | Node.js, Express 4, REST API, penyimpanan JSON |
-| Data | Seed in-memory (`server/src/data.js`) + `server/data/bookings.json` untuk pesanan |
+| Backend | Node.js, Express 4, REST API |
+| Data | Seed in-memory (`server/src/data.js`) + [Neon](https://neon.tech) Lakebase Postgres (tabel `bookings`) untuk pesanan |
 
 ## Alur & arsitektur
 
@@ -46,13 +46,18 @@ TripDESK/
 │       ├── main.jsx      # bootstrap + PWA
 │       └── styles.css    # design system kecil + layout mobile
 ├── server/               # REST API Express
-│   ├── src/
-│   │   ├── data.js       # seed kota, rute, armada, jadwal, profil
-│   │   ├── store.js      # pesanan + ketersediaan kursi
-│   │   ├── dates.js      # util tanggal ISO
-│   │   ├── app.js        # setup express
-│   │   └── routes/       # catalog.js, bookings.js, profile.js
-│   └── data/             # bookings.json (runtime, di-ignore git)
+│   ├── db/
+│   │   └── schema.sql    # skema tabel bookings (PostgreSQL)
+│   ├── scripts/
+│   │   ├── migrate.mjs   # jalankan skema ke Neon (koneksi direct)
+│   │   └── test-api.mjs  # smoke test alur pemesanan ke Neon
+│   └── src/
+│       ├── data.js       # seed kota, rute, armada, jadwal, profil
+│       ├── db.js         # pool node-postgres ke Neon
+│       ├── store.js      # query pesanan + ketersediaan kursi
+│       ├── dates.js      # util tanggal ISO
+│       ├── app.js        # setup express
+│       └── routes/       # catalog.js, bookings.js, profile.js
 └── docs/
     ├── APLIKASI.md       # dokumentasi teknis: arsitektur, API, peta, PWA
     ├── diagram.drawio    # sumber diagram (alur + arsitektur)
@@ -155,9 +160,18 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 
 Untuk memperbarui data jalan: `cd app && node scripts/fetch-osm.mjs` (butuh internet). Peta tetap ilustrasi untuk demo, bukan untuk navigasi.
 
-## Reset data demo
+## Database Neon
 
-Hapus `server/data/bookings.json` lalu restart API. Ketersediaan kursi demo dihitung deterministik dari `(jadwal, tanggal)`, jadi tampilan akan konsisten lagi.
+Proyek ini terhubung ke branch `production` lewat `.neon` dan `neon.ts`. Variabel `DATABASE_URL` (pooled, untuk API) dan `DATABASE_URL_UNPOOLED` (direct, untuk migrasi) ditarik ke `.env` oleh:
+
+```bash
+neon deploy          # atau: neon env pull
+cd server && npm run migrate
+```
+
+API lokal membaca `.env` lewat `dotenv`; di Vercel, daftarkan `DATABASE_URL` sebagai env var project. Kursi demo tetap deterministik dari `(jadwal, tanggal)`; kursi yang benar-benar dipesan dibaca dari tabel `bookings`.
+
+Untuk mengosongkan riwayat: `DELETE /api/bookings` (hanya pesanan selesai/dibatalkan). Reset penuh lewat SQL: `TRUNCATE bookings` di Neon SQL Editor. File `server/data/bookings.json` sudah tidak dipakai.
 
 ## Uji status pelacakan
 
@@ -168,14 +182,24 @@ npm run test:tracking
 
 Enam kasus: LIVE, armada tiba, dalam perjalanan, selesai, dibatalkan, dan dijadwalkan. Untuk melihat status tertentu di browser tanpa menunggu jam asli, buka `/lacak/<kode>?at=HH:MM` (mode demo).
 
+## Uji API ke Neon
+
+```bash
+cd server
+npm start              # di terminal lain
+npm run test:api
+```
+
+Smoke test membuat pesanan, memeriksa kursi, membatalkan, lalu menghapusnya — jadi database kembali kosong setelah uji.
+
 ## Deploy
 
 Frontend statis ke Vercel: **Root Directory `app`**, build `npm run build`, output `dist`, env `VITE_API_URL=https://<domain-api>/api`. `app/vercel.json` sudah menangani SPA fallback.
 
 API punya dua pilihan:
 
-- **Host terpisah** (Render/Railway/Fly.io/VPS): Root Directory `server`, start `npm start`, set `PORT` bila perlu, dan mount volume di `server/data` supaya pesanan tidak hilang saat restart.
-- **Vercel juga** (project kedua): Root Directory `server`. Vercel mendeteksi Express dari `src/app.js`/`src/index.js` — tanpa build command. Catatan: filesystem Vercel read-only, jadi `store.js` menulis ke `/tmp` dan pesanan hilang saat cold start — cocok untuk demo saja.
+- **Host terpisah** (Render/Railway/Fly.io/VPS): Root Directory `server`, start `npm start`, set `PORT` bila perlu. Pesanan disimpan di Neon, jadi tidak perlu volume disk.
+- **Vercel juga** (project kedua): Root Directory `server`. Vercel mendeteksi Express dari `src/app.js`/`src/index.js` — tanpa build command. Set env var `DATABASE_URL` (pooled) di project Vercel. Pool di-`drain` otomatis lewat `@vercel/functions` saat `VERCEL` terdeteksi. Untuk migrasi, pakai `DATABASE_URL_UNPOOLED` secara lokal.
 
 PWA harus diakses lewat HTTPS agar service worker dan install prompt aktif. Langkah lengkap: [docs/APLIKASI.md § Deployment](docs/APLIKASI.md#11-deployment).
 

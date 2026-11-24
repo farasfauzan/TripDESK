@@ -49,14 +49,14 @@ Catatan: kolom Bahasa/platform di sheet masih kosong. Skeleton memakai **PWA + J
 │  /profil  /tentang       │ ◄───── │  /profile                     │
 └──────────────────────────┘        └──────────────┬───────────────┘
                                                      │
-                                        seed data + bookings.json
+                                        seed data + Neon Postgres
 ```
 
 Keputusan teknis:
 
 - **PWA** dipilih karena wajib deploy di free hosting, cepat diuji di browser, dan tetap bisa dipasang ke home screen.
-- **Express + JSON** cukup untuk skeleton; tidak perlu setup database sebelum skema stabil. Migrasi ke PostgreSQL/MySQL bisa dilakukan tanpa mengubah kontrak API.
-- **Kursi demo deterministik** (`hash(jadwal+tanggal)`) supaya tampilan ketersediaan konsisten tanpa data transaksi nyata, sementara kursi yang benar-benar dipesan tetap dihitung dari `bookings.json`.
+- **Express + Neon Postgres** dipakai sejak awal supaya pesanan tidak hilang saat cold start; kontrak API tetap JSON.
+- **Kursi demo deterministik** (`hash(jadwal+tanggal)`) supaya tampilan ketersediaan konsisten tanpa data transaksi nyata, sementara kursi yang benar-benar dipesan tetap dihitung dari tabel `bookings`.
 - **Mobile-first 460 px** dengan bottom nav fixed meniru pola aplikasi ride-hailing, sesuai referensi "Gojek versi travel".
 
 ### Model data

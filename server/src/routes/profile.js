@@ -1,11 +1,12 @@
 import { Router } from 'express'
 import { profile } from '../data.js'
 import { listBookings } from '../store.js'
+import { asyncHandler } from '../asyncHandler.js'
 
 const router = Router()
 
-router.get('/profile', (_req, res) => {
-  const bookings = listBookings()
+router.get('/profile', asyncHandler(async (_req, res) => {
+  const bookings = await listBookings()
   const active = bookings.filter((b) => b.status === 'terjadwal')
   const data = {
     ...profile,
@@ -17,6 +18,6 @@ router.get('/profile', (_req, res) => {
     },
   }
   res.json({ data })
-})
+}))
 
 export default router
