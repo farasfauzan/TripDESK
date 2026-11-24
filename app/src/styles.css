@@ -2091,7 +2091,7 @@ h3 {
   left: 50%;
   z-index: 30;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   width: 100%;
   max-width: 460px;
   padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
@@ -2105,7 +2105,7 @@ h3 {
   display: grid;
   gap: 3px;
   justify-items: center;
-  padding: 6px 4px 4px;
+  padding: 6px 2px 4px;
   border-radius: 12px;
   color: var(--muted);
   font-size: 10.5px;

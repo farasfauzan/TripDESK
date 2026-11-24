@@ -28,13 +28,13 @@ Sumber: ketentuan tugas travel antarkota (7 poin).
 | # | Ketentuan | Implementasi di repo | Status |
 | --- | --- | --- | --- |
 | 1 | API sendiri sesuai Modul 1 | `server/` Express, endpoint katalog + transaksi, seed data sendiri | ✅ |
-| 2 | Bottom Navigation Bar | `app/src/shared/BottomNav.jsx`, 3 tab (Beranda, Pesanan, Profil), active state | ✅ |
+| 2 | Bottom Navigation Bar | `app/src/shared/BottomNav.jsx`, 5 tab (Beranda, Cari, Peta, Pesanan, Profil), active state | ✅ |
 | 3 | Minimal 5 halaman | 10 halaman (satu folder per fitur di `app/src/`) + 404 | ✅ |
 | 4 | 2 halaman list + detail | `/cari` → `/jadwal/:id`, `/pesanan` → `/pesanan/:code` | ✅ |
 | 5 | Profile/About | `/profil` dan `/tentang` | ✅ |
 | 6 | Source code di GitHub | publik di [farasfauzan/TripDESK](https://github.com/farasfauzan/TripDESK) | ✅ |
 | 7 | Judul unik | "Tripdesk - Tiket Travel Antarkota" belum ada duplikat di sheet | ✅ |
-| — | PWA wajib deploy free hosting | manifest + service worker siap, deploy belum | ⏳ |
+| — | PWA wajib deploy free hosting | live di Vercel: [tripdesk-web.vercel.app](https://tripdesk-web.vercel.app) + API [tripdesk-api.vercel.app](https://tripdesk-api.vercel.app) | ✅ |
 | — | Asistensi minimal 1× | belum dijadwalkan | ⏳ |
 
 Catatan: kolom Bahasa/platform di sheet masih kosong. Skeleton memakai **PWA + JavaScript**; kalau ingin pindah ke React Native/Flutter, API tetap bisa dipakai ulang.

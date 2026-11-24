@@ -1,9 +1,11 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { HomeIcon, TicketIcon, UserIcon } from './Icons.jsx'
+import { HomeIcon, PinIcon, SearchIcon, TicketIcon, UserIcon } from './Icons.jsx'
 
 const items = [
-  { to: '/', label: 'Beranda', icon: HomeIcon, match: ['/', '/cari', '/jadwal', '/pesan', '/armada'] },
-  { to: '/pesanan', label: 'Pesanan', icon: TicketIcon, match: ['/pesanan'] },
+  { to: '/', label: 'Beranda', icon: HomeIcon, match: ['/'] },
+  { to: '/cari', label: 'Cari', icon: SearchIcon, match: ['/cari', '/jadwal', '/pesan'] },
+  { to: '/armada', label: 'Peta', icon: PinIcon, match: ['/armada'] },
+  { to: '/pesanan', label: 'Pesanan', icon: TicketIcon, match: ['/pesanan', '/lacak'] },
   { to: '/profil', label: 'Profil', icon: UserIcon, match: ['/profil', '/tentang'] },
 ]
 

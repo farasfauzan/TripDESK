@@ -3,7 +3,7 @@ import { CheckIcon, ChevronLeftIcon } from '../shared/Icons.jsx'
 
 const features = [
   'REST API buatan sendiri (Express)',
-  'Bottom navigation bar 3 tab',
+  'Bottom navigation bar 5 tab: Beranda, Cari, Peta, Pesanan, Profil',
   '10 halaman: beranda, peta armada, cari, detail jadwal, pemesanan, pesanan, detail pesanan, lacak armada, profil, tentang',
   '2 daftar utama dengan halaman detail: jadwal travel & pesanan',
   'Halaman profil dan tentang aplikasi',

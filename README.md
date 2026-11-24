@@ -141,7 +141,7 @@ Format respons: `{ "data": ... }` untuk sukses, `{ "error": { "code", "message" 
 | # | Fitur | Implementasi | Status |
 | --- | --- | --- | --- |
 | 1 | REST API sendiri | Express, 12 endpoint, seed data sendiri | ✅ |
-| 2 | Bottom navigation | 3 tab: Beranda, Pesanan, Profil | ✅ |
+| 2 | Bottom navigation | 5 tab: Beranda, Cari, Peta, Pesanan, Profil | ✅ |
 | 3 | Halaman lengkap | 11 halaman + halaman 404 | ✅ |
 | 4 | Daftar + detail | Jadwal → detail jadwal; Pesanan → detail pesanan | ✅ |
 | 5 | Profil & tentang | `/profil` dan `/tentang` | ✅ |
