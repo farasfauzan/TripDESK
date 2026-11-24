@@ -409,6 +409,7 @@ export default function ArmadaMap() {
 
         {!loading && !error && armada.length === 0 ? (
           <EmptyState
+            emoji="🚐"
             title="Belum ada armada"
             description="Semua armada di rute ini sedang penuh atau di luar jangkauan. Coba titik jemput atau tanggal lain."
             action={

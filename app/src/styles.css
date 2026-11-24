@@ -1753,6 +1753,9 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--brand-ink);
   font-size: 11.5px;
   font-weight: 700;
@@ -1815,6 +1818,8 @@ h3 {
 .toast-close {
   margin-left: auto;
   padding: 0 2px;
+  border: 0;
+  background: none;
   color: inherit;
   font-size: 16px;
   line-height: 1;

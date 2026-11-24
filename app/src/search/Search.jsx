@@ -202,6 +202,7 @@ export default function Search() {
       ) : (
         !error && (
           <EmptyState
+            emoji="🗺️"
             title="Belum ada armada"
             description="Rute ini belum tersedia pada tanggal tersebut. Coba tanggal atau rute lain."
             action={

@@ -21,11 +21,13 @@ export function ErrorBox({ message, onRetry }) {
   )
 }
 
-export function EmptyState({ title, description, action }) {
+// Emoji bawaan sengaja bus, bukan 🎫: di iOS/Apple tiket digambar sebagai
+// tiket konser ("LIVE CONCERT TICKET ZONE A") yang membingungkan di app travel.
+export function EmptyState({ title, description, action, emoji = '🚌' }) {
   return (
     <div className="state state-empty">
       <div className="state-emoji" aria-hidden="true">
-        🎫
+        {emoji}
       </div>
       <h3>{title}</h3>
       <p>{description}</p>
