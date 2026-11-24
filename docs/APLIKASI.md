@@ -169,9 +169,23 @@ cd app && npm install && npm run dev        # http://localhost:5173 (proxy /api)
 
 ## 11. Deployment
 
-- **Frontend**: `app/vercel.json` menulis ulang semua path ke `index.html` (SPA). Build statis, tanpa server.
-- **API**: harus di-host terpisah (Railway/Fly/VPS). Set `VITE_API_URL=https://api.contoh.com/api` saat build frontend, dan izinkan origin frontend lewat CORS. Kalau API dan web satu domain, cukup reverse-proxy `/api`.
-- `server/data/bookings.json` bersifat runtime — di host tanpa disk persisten, pesanan akan hilang saat restart.
+Build frontend statis (Vite) dan API Express terpisah. Ada dua cara.
+
+### A. Frontend di Vercel, API di host lain (disarankan)
+
+1. Vercel → import repo → **Root Directory `app`**, framework Vite, build `npm run build`, output `dist`.
+2. Env `VITE_API_URL=https://<host-api>/api` (dibaca saat build — ganti berarti redeploy).
+3. API di Railway/Render/Fly/VPS: Root Directory `server`, start `npm start`, mount volume di `server/data` supaya pesanan tidak hilang saat restart.
+4. `app/vercel.json` sudah menulis ulang semua path ke `index.html`, jadi deep link seperti `/pesanan/TD-XXXXX` tidak 404.
+
+### B. Dua-duanya di Vercel (dua project)
+
+1. **Project frontend**: Root Directory `app`, build `npm run build`, output `dist`, env `VITE_API_URL=https://<project-api>/api`.
+2. **Project API**: Root Directory `server`. Tidak perlu konfigurasi build — Vercel mendeteksi Express dari `src/app.js` (default export) atau `src/index.js` (`app.listen`), lalu menjalankan seluruh app sebagai satu Vercel Function. Semua route, validasi, dan bentuk respons sama dengan versi lokal. `server/vercel.json` mengarahkan `/` ke `/api/health` supaya domain API bisa dicek langsung.
+3. **Penyimpanan**: filesystem Vercel read-only, jadi `store.js` menulis ke `/tmp/tripdesk-data` saat env `VERCEL` ada. `POST /bookings` tetap 201, tetapi **data hilang saat instance baru/cold start**. Untuk data permanen, isi `TRIPDESK_DATA_DIR` ke disk persisten atau ganti store ke database.
+4. CORS sudah terbuka (`app.use(cors())`); batasi `origin` kalau perlu.
+
+Keduanya memakai Node 20+ (`server/package.json` → `engines`).
 
 ## 12. Batasan yang perlu diketahui
 

@@ -3,7 +3,14 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
-const dataDir = path.join(here, '..', 'data')
+// Di serverless (Vercel) filesystem proyek read-only, jadi simpan ke /tmp:
+// POST /bookings tetap jalan, tapi isinya hilang saat instance baru dibuat.
+// Host dengan disk persisten bisa menimpa lewat TRIPDESK_DATA_DIR.
+const dataDir = process.env.TRIPDESK_DATA_DIR
+  ? path.resolve(process.env.TRIPDESK_DATA_DIR)
+  : process.env.VERCEL
+    ? path.join('/tmp', 'tripdesk-data')
+    : path.join(here, '..', 'data')
 const file = path.join(dataDir, 'bookings.json')
 
 /** @type {Array<Record<string, any>>} */
@@ -19,8 +26,13 @@ function load() {
 }
 
 export function persistBookings() {
-  fs.mkdirSync(dataDir, { recursive: true })
-  fs.writeFileSync(file, JSON.stringify(bookings, null, 2))
+  try {
+    fs.mkdirSync(dataDir, { recursive: true })
+    fs.writeFileSync(file, JSON.stringify(bookings, null, 2))
+  } catch (error) {
+    // Gagal menulis tidak boleh membuat request ikut 500; data tetap di memori.
+    console.warn('[store] gagal menyimpan bookings:', error.message)
+  }
 }
 
 function hash(text) {

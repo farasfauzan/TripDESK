@@ -170,8 +170,13 @@ Enam kasus: LIVE, armada tiba, dalam perjalanan, selesai, dibatalkan, dan dijadw
 
 ## Deploy
 
-- **Frontend (Vercel/Netlify)**: build `app/`, output `dist/`, aktifkan SPA fallback ke `index.html`, set `VITE_API_URL`.
-- **API (Render/Railway/Fly.io)**: jalankan `server/`, start command `npm start`, set `PORT` bila diperlukan.
-- PWA harus diakses lewat HTTPS agar service worker dan install prompt aktif.
+Frontend statis ke Vercel: **Root Directory `app`**, build `npm run build`, output `dist`, env `VITE_API_URL=https://<domain-api>/api`. `app/vercel.json` sudah menangani SPA fallback.
+
+API punya dua pilihan:
+
+- **Host terpisah** (Render/Railway/Fly.io/VPS): Root Directory `server`, start `npm start`, set `PORT` bila perlu, dan mount volume di `server/data` supaya pesanan tidak hilang saat restart.
+- **Vercel juga** (project kedua): Root Directory `server`. Vercel mendeteksi Express dari `src/app.js`/`src/index.js` — tanpa build command. Catatan: filesystem Vercel read-only, jadi `store.js` menulis ke `/tmp` dan pesanan hilang saat cold start — cocok untuk demo saja.
+
+PWA harus diakses lewat HTTPS agar service worker dan install prompt aktif. Langkah lengkap: [docs/APLIKASI.md § Deployment](docs/APLIKASI.md#11-deployment).
 
 Detail teknis ada di [docs/APLIKASI.md](docs/APLIKASI.md); rencana dan backlog di [docs/RENCANA.md](docs/RENCANA.md).

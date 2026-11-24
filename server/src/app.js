@@ -21,3 +21,8 @@ app.use((err, _req, res, _next) => {
   console.error(err)
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Terjadi kesalahan pada server.' } })
 })
+
+// Vercel mendeteksi Express lewat default export di app.js/index.js/server.js
+// (root atau src/). index.js juga valid karena memakai app.listen, tapi default
+// export ini membuat keduanya sama-sama dikenali.
+export default app
