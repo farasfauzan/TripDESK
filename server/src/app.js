@@ -9,6 +9,16 @@ export const app = express()
 app.use(cors())
 app.use(express.json())
 
+// Halaman root supaya domain API bisa dicek tanpa menghafal path.
+app.get('/', (_req, res) => {
+  res.json({
+    service: 'tripdesk-api',
+    status: 'ok',
+    health: '/api/health',
+    endpoints: ['/api/locations', '/api/pickup-points', '/api/routes', '/api/schedules', '/api/nearby', '/api/bookings', '/api/profile'],
+  })
+})
+
 app.use('/api', catalog)
 app.use('/api', bookings)
 app.use('/api', profile)
