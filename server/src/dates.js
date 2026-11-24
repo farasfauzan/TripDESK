@@ -1,4 +1,21 @@
-export const todayIso = () => new Date().toISOString().slice(0, 10)
+// Semua jam bisnis memakai Asia/Jakarta, bukan zona mesin. Vercel menjalankan
+// fungsi di UTC, jadi tanpa ini status jadwal meleset 7 jam.
+const WIB = new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Asia/Jakarta',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+})
+
+// "YYYY-MM-DD HH:MM" waktu Jakarta (bisa dibandingkan sebagai string).
+export const localStamp = (date = new Date()) => WIB.format(date)
+
+export const todayIso = () => localStamp().slice(0, 10)
+
+export const nowTime = () => localStamp().slice(11, 16)
 
 // Validasi tanggal ISO sekaligus menolak tanggal mustahil seperti 2026-02-31.
 export const isIsoDate = (value) => {
@@ -15,11 +32,6 @@ export const shiftTime = (time, delta) => {
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
-// Waktu lokal "YYYY-MM-DD HH:MM" supaya bisa dibandingkan langsung (string)
-// dengan tanggal + jam jadwal. Dipakai untuk menurunkan status perjalanan.
-export const localStamp = (date = new Date()) => {
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(
-    date.getHours(),
-  )}:${pad(date.getMinutes())}`
-}
+// Jadwal hari ini yang jam berangkatnya sudah lewat dianggap sudah berangkat:
+// jangan ditawarkan lagi, dan jangan bisa dipesan.
+export const hasDeparted = (schedule, date) => date === todayIso() && schedule.departTime <= nowTime()

@@ -8,12 +8,14 @@ const booking = {
   arriveTime: '17:30',
 }
 
+// Semua waktu di bawah UTC (Z) = WIB - 7, supaya hasilnya sama di mesin mana pun.
 const cases = [
-  ['pagi sebelum berangkat', '2026-11-20T10:07:00', 'terjadwal'],
-  ['tepat jam berangkat', '2026-11-20T15:00:00', 'berlangsung'],
-  ['di tengah perjalanan', '2026-11-20T16:12:00', 'berlangsung'],
-  ['tepat jam tiba', '2026-11-20T17:30:00', 'selesai'],
-  ['sehari setelahnya', '2026-11-21T08:00:00', 'selesai'],
+  ['pagi sebelum berangkat', '2026-11-20T03:07:00Z', 'terjadwal'],
+  ['tepat jam berangkat', '2026-11-20T08:00:00Z', 'berlangsung'],
+  ['di tengah perjalanan', '2026-11-20T09:12:00Z', 'berlangsung'],
+  ['tepat jam tiba', '2026-11-20T10:30:00Z', 'selesai'],
+  ['sehari setelahnya', '2026-11-21T01:00:00Z', 'selesai'],
+  ['tengah malam WIB masih tanggal 20', '2026-11-19T17:30:00Z', 'terjadwal'],
 ]
 
 for (const [name, now, expect] of cases) {
@@ -23,7 +25,7 @@ for (const [name, now, expect] of cases) {
 }
 
 assert.equal(
-  deriveStatus({ ...booking, status: 'dibatalkan' }, new Date('2026-11-20T10:00:00')),
+  deriveStatus({ ...booking, status: 'dibatalkan' }, new Date('2026-11-20T10:00:00Z')),
   'dibatalkan',
 )
 console.log('PASS dibatalkan → dibatalkan')

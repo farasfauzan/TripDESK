@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { schedules } from '../data.js'
 import { addBooking, bookedSeats, bookingCode, findBooking, listBookings, persistBookings, removeBooking, removeHistory } from '../store.js'
-import { isIsoDate, shiftTime, todayIso } from '../dates.js'
+import { hasDeparted, isIsoDate, shiftTime, todayIso } from '../dates.js'
 import { deriveStatus } from '../bookingStatus.js'
 import { etaForPickup } from '../eta.js'
 
@@ -37,6 +37,12 @@ router.post('/bookings', (req, res) => {
 
   if (!isIsoDate(date) || date < todayIso()) {
     return res.status(400).json({ error: { code: 'INVALID_DATE', message: 'Tanggal keberangkatan tidak valid.' } })
+  }
+
+  if (hasDeparted(schedule, date)) {
+    return res.status(409).json({
+      error: { code: 'TRIP_STARTED', message: 'Jadwal ini sudah berangkat. Pilih jadwal lain.' },
+    })
   }
 
   const seatNumbers = Array.isArray(seats) ? [...new Set(seats.map(Number))] : []

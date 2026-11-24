@@ -172,7 +172,9 @@ export default function Home() {
                       {route.destination}
                     </strong>
                     <small>
-                      {route.scheduleCount} jadwal · mulai {rupiah(route.cheapestPrice)}
+                      {route.scheduleCount
+                        ? `${route.scheduleCount} jadwal · mulai ${rupiah(route.cheapestPrice)}`
+                        : 'Tidak ada jadwal lagi hari ini'}
                     </small>
                   </span>
                   <ChevronRightIcon width={18} height={18} />
@@ -193,7 +195,10 @@ export default function Home() {
                 ))}
               </div>
             ) : (
-              <EmptyState title="Belum ada jadwal" description="Coba pilih rute lain untuk hari ini." />
+              <EmptyState
+                title="Jadwal hari ini sudah berangkat"
+                description="Semua jadwal hari ini sudah lewat. Coba pilih tanggal besok di halaman Cari."
+              />
             )}
           </section>
         </>

@@ -203,8 +203,12 @@ export default function Search() {
         !error && (
           <EmptyState
             emoji="🗺️"
-            title="Belum ada armada"
-            description="Rute ini belum tersedia pada tanggal tersebut. Coba tanggal atau rute lain."
+            title={date === todayIso() ? 'Jadwal hari ini sudah berangkat' : 'Belum ada armada'}
+            description={
+              date === todayIso()
+                ? 'Semua jadwal hari ini sudah lewat. Coba pilih tanggal besok.'
+                : 'Rute ini belum tersedia pada tanggal tersebut. Coba tanggal atau rute lain.'
+            }
             action={
               <Link className="btn btn-ghost" to="/">
                 Kembali ke beranda

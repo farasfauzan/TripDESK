@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { locations, pickupPointsByCity, routes, schedules } from '../data.js'
 import { seatMap } from '../store.js'
-import { isIsoDate, shiftTime, todayIso } from '../dates.js'
+import { hasDeparted, isIsoDate, shiftTime, todayIso } from '../dates.js'
 import { etaForPickup, distanceForPickup } from '../eta.js'
 
 const router = Router()
@@ -87,7 +87,9 @@ router.get('/routes', (req, res) => {
     .filter((route) => (origin ? route.originId === origin.id : true))
     .filter((route) => (destination ? route.destinationId === destination.id : true))
     .map((route) => {
-      const routeSchedules = schedules.filter((s) => s.routeId === route.id)
+      const routeSchedules = schedules
+        .filter((s) => s.routeId === route.id)
+        .filter((s) => !hasDeparted(s, date))
       const cheapest = routeSchedules.reduce((min, s) => Math.min(min, s.price), Number.POSITIVE_INFINITY)
       const seatsLeft = routeSchedules.reduce((sum, s) => sum + seatMap(s.id, date, s.seatLayout).seatsLeft, 0)
       return {
@@ -127,6 +129,7 @@ router.get('/schedules', (req, res) => {
   const data = schedules
     .filter((s) => (origin ? s.originId === origin.id : true))
     .filter((s) => (destination ? s.destinationId === destination.id : true))
+    .filter((s) => !hasDeparted(s, date))
     .map((s) => toSummary(s, date, pickup?.cityId === s.originId ? pickup : null))
     .sort((a, b) => a.departTime.localeCompare(b.departTime))
 
@@ -162,6 +165,7 @@ router.get('/nearby', (req, res) => {
 
   const data = schedules
     .filter((schedule) => schedule.originId === origin.id)
+    .filter((schedule) => !hasDeparted(schedule, date))
     .filter((schedule) => (destination ? schedule.destinationId === destination.id : true))
     .map((schedule) => ({
       ...toSummary(schedule, date, pickup),
