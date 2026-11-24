@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { cancelBooking, getBooking } from '../shared/api.js'
+import { cancelBooking, deleteBooking, getBooking } from '../shared/api.js'
 import { dateLong, rupiah } from '../shared/utils.js'
 import StatusPill from './StatusPill.jsx'
+import ConfirmDialog from '../shared/ConfirmDialog.jsx'
 import { ErrorBox, Loading } from '../shared/State.jsx'
 import {
   CheckIcon,
@@ -10,6 +11,7 @@ import {
   ClockIcon,
   CopyIcon,
   PinIcon,
+  TrashIcon,
   UserIcon,
 } from '../shared/Icons.jsx'
 
@@ -23,6 +25,8 @@ export default function OrderDetail() {
   const [flash, setFlash] = useState(Boolean(state?.justBooked))
   const [copied, setCopied] = useState(false)
   const [cancelling, setCancelling] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirm, setConfirm] = useState(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -36,7 +40,7 @@ export default function OrderDetail() {
 
   useEffect(() => {
     if (!flash) return undefined
-    const timer = setTimeout(() => setFlash(false), 4500)
+    const timer = setTimeout(() => setFlash(false), 6000)
     return () => clearTimeout(timer)
   }, [flash])
 
@@ -61,7 +65,7 @@ export default function OrderDetail() {
 
   const cancel = async () => {
     if (!booking) return
-    if (!window.confirm(`Batalkan pesanan ${booking.code}? Kursi akan dilepas kembali.`)) return
+    setConfirm(null)
     setCancelling(true)
     setError('')
     try {
@@ -71,6 +75,23 @@ export default function OrderDetail() {
       setError(err.message)
     } finally {
       setCancelling(false)
+    }
+  }
+
+  const removeFromHistory = async () => {
+    if (!booking) return
+    setConfirm(null)
+    setDeleting(true)
+    setError('')
+    try {
+      await deleteBooking(booking.code)
+      navigate('/pesanan', {
+        replace: true,
+        state: { flash: `Pesanan ${booking.code} dihapus dari riwayat.` },
+      })
+    } catch (err) {
+      setError(err.message)
+      setDeleting(false)
     }
   }
 
@@ -90,6 +111,20 @@ export default function OrderDetail() {
           Pesanan berhasil dibuat. Tunjukkan e-tiket ini saat naik armada.
         </div>
       ) : null}
+
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm === 'cancel' ? 'Batalkan pesanan?' : 'Hapus dari riwayat?'}
+        description={
+          confirm === 'cancel'
+            ? `Pesanan ${booking?.code ?? ''} akan dibatalkan dan kursinya dilepas kembali.`
+            : `Pesanan ${booking?.code ?? ''} akan dihapus permanen dari riwayat.`
+        }
+        confirmLabel={confirm === 'cancel' ? 'Batalkan pesanan' : 'Hapus'}
+        busy={cancelling || deleting}
+        onConfirm={confirm === 'cancel' ? cancel : removeFromHistory}
+        onCancel={() => setConfirm(null)}
+      />
 
       <ErrorBox message={error} />
       {!booking && !error ? <Loading label="Memuat e-tiket…" /> : null}
@@ -174,8 +209,14 @@ export default function OrderDetail() {
               {copied ? 'Kode disalin' : 'Salin kode'}
             </button>
             {booking.status === 'terjadwal' ? (
-              <button type="button" className="btn btn-danger-ghost" onClick={cancel} disabled={cancelling}>
+              <button type="button" className="btn btn-danger-ghost" onClick={() => setConfirm('cancel')} disabled={cancelling}>
                 {cancelling ? 'Membatalkan…' : 'Batalkan pesanan'}
+              </button>
+            ) : null}
+            {booking.status === 'selesai' || booking.status === 'dibatalkan' ? (
+              <button type="button" className="btn btn-ghost" onClick={() => setConfirm('delete')} disabled={deleting}>
+                <TrashIcon width={15} height={15} />
+                {deleting ? 'Menghapus…' : 'Hapus dari riwayat'}
               </button>
             ) : null}
           </div>

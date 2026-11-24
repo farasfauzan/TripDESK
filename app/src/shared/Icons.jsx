@@ -141,6 +141,17 @@ export function CopyIcon(props) {
   )
 }
 
+export function TrashIcon(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4.6 7h14.8" />
+      <path d="M9.4 7V5.6a1.6 1.6 0 0 1 1.6-1.6h2a1.6 1.6 0 0 1 1.6 1.6V7" />
+      <path d="M6.6 7l.8 11.1a1.8 1.8 0 0 0 1.8 1.7h6.4a1.8 1.8 0 0 0 1.8-1.7L18.2 7" />
+      <path d="M10.2 11v5.2M13.8 11v5.2" />
+    </svg>
+  )
+}
+
 export function CheckIcon(props) {
   return (
     <svg {...base} {...props}>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { getBookings } from '../shared/api.js'
+import { Link, useLocation } from 'react-router-dom'
+import { clearHistory as clearHistoryApi, getBookings } from '../shared/api.js'
 import { dateShort, rupiah } from '../shared/utils.js'
 import StatusPill from './StatusPill.jsx'
+import ConfirmDialog from '../shared/ConfirmDialog.jsx'
 import { EmptyState, ErrorBox, Loading } from '../shared/State.jsx'
-import { ArrowRightIcon, TicketIcon } from '../shared/Icons.jsx'
+import { ArrowRightIcon, CheckIcon, TicketIcon, TrashIcon } from '../shared/Icons.jsx'
 
 const filters = [
   { id: 'semua', label: 'Semua' },
@@ -19,6 +20,22 @@ export default function Orders() {
   const [filter, setFilter] = useState('semua')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [clearing, setClearing] = useState(false)
+  const [toast, setToast] = useState('')
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const { state } = useLocation()
+
+  // Notifikasi hapus bertahan 6 detik (dulu cuma baris teks yang langsung
+  // hilang begitu pindah halaman), dan bisa ditutup manual.
+  useEffect(() => {
+    if (!toast) return undefined
+    const timer = setTimeout(() => setToast(''), 6000)
+    return () => clearTimeout(timer)
+  }, [toast])
+
+  useEffect(() => {
+    if (state?.flash) setToast(state.flash)
+  }, [state])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -34,6 +51,27 @@ export default function Orders() {
   }, [])
 
   const visible = filter === 'semua' ? bookings : bookings.filter((booking) => booking.status === filter)
+  const historyCount = bookings.filter(
+    (booking) => booking.status === 'selesai' || booking.status === 'dibatalkan',
+  ).length
+
+  const clearHistory = async () => {
+    if (!historyCount) return
+    setConfirmOpen(false)
+    setClearing(true)
+    setError('')
+    try {
+      const { removed } = await clearHistoryApi()
+      setBookings((prev) =>
+        prev.filter((booking) => booking.status !== 'selesai' && booking.status !== 'dibatalkan'),
+      )
+      setToast(removed ? `${removed} riwayat dihapus.` : 'Tidak ada riwayat yang perlu dihapus.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setClearing(false)
+    }
+  }
 
   return (
     <div className="page">
@@ -61,6 +99,41 @@ export default function Orders() {
           </button>
         ))}
       </div>
+
+      {historyCount ? (
+        <div className="history-bar">
+          <span>{historyCount} riwayat tersimpan</span>
+          <button
+            type="button"
+            className="history-clear"
+            onClick={() => setConfirmOpen(true)}
+            disabled={clearing}
+          >
+            <TrashIcon width={15} height={15} />
+            {clearing ? 'Menghapus…' : 'Hapus riwayat'}
+          </button>
+        </div>
+      ) : null}
+
+      {toast ? (
+        <div className="toast toast-ok" role="status">
+          <CheckIcon width={18} height={18} />
+          <span>{toast}</span>
+          <button type="button" className="toast-close" onClick={() => setToast('')} aria-label="Tutup notifikasi">
+            ×
+          </button>
+        </div>
+      ) : null}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Hapus riwayat?"
+        description={`${historyCount} pesanan selesai & dibatalkan akan dihapus permanen. Pesanan aktif tetap disimpan.`}
+        confirmLabel="Hapus riwayat"
+        busy={clearing}
+        onConfirm={clearHistory}
+        onCancel={() => setConfirmOpen(false)}
+      />
 
       <ErrorBox message={error} />
 

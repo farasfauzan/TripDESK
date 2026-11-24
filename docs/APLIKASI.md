@@ -72,8 +72,8 @@ Warna, tipografi, jarak | `styles.css`
 | `/cari` | `search/Search` | locations, pickup-points, schedules | Filter asal/tujuan/tanggal/titik jemput |
 | `/jadwal/:id` | `schedule/ScheduleDetail` | schedule | Harga, armada, sisa kursi |
 | `/pesan/:id` | `checkout/Checkout` | schedule, profile | Pilih kursi 1–6, `POST /bookings` |
-| `/pesanan` | `orders/Orders` | bookings | Filter status (terjadwal/berlangsung/selesai/dibatalkan) |
-| `/pesanan/:code` | `orders/OrderDetail` | booking | E-tiket, tombol batal |
+| `/pesanan` | `orders/Orders` | bookings | Filter status + tombol "Hapus riwayat" (bulk) |
+| `/pesanan/:code` | `orders/OrderDetail` | booking | E-tiket, tombol batal, hapus dari riwayat |
 | `/lacak/:code` | `tracking/Tracking` | booking | Peta koridor + timeline perjalanan |
 | `/profil` | `profile/Profile` | profile | Ringkasan akun |
 | `/tentang` | `about/About` | — | Statis |
@@ -97,9 +97,11 @@ Base: `http://localhost:4000/api`. Respons sukses `{ "data": … }`, gagal `{ "e
 | GET | `/bookings/:code` | — | Satu pesanan |
 | POST | `/bookings` | `scheduleId`, `date`, `seats[]`, `passenger{name,phone,email}`, `pickupPointId` | Buat pesanan → 201 |
 | PATCH | `/bookings/:code/cancel` | — | Batalkan; 409 kalau perjalanan sudah mulai |
+| DELETE | `/bookings/:code` | — | Hapus satu riwayat (hanya `selesai`/`dibatalkan`; 409 `TRIP_ACTIVE` kalau masih aktif) |
+| DELETE | `/bookings` | — | Bersihkan semua riwayat (selesai + dibatalkan), pesanan aktif tetap |
 | GET | `/profile` | — | Profil demo |
 
-Kode error: `INVALID_ORIGIN`, `INVALID_SCHEDULE`, `SCHEDULE_NOT_FOUND`, `INVALID_DATE`, `INVALID_SEATS`, `SEAT_TAKEN`, `INVALID_NAME`, `INVALID_PHONE`, `INVALID_PICKUP`, `ROUTE_NOT_FOUND`, `BOOKING_NOT_FOUND`, `ALREADY_CANCELLED`, `TRIP_STARTED`, `NOT_FOUND`, `INTERNAL_ERROR`.
+Kode error: `INVALID_ORIGIN`, `INVALID_SCHEDULE`, `SCHEDULE_NOT_FOUND`, `INVALID_DATE`, `INVALID_SEATS`, `SEAT_TAKEN`, `INVALID_NAME`, `INVALID_PHONE`, `INVALID_PICKUP`, `ROUTE_NOT_FOUND`, `BOOKING_NOT_FOUND`, `ALREADY_CANCELLED`, `TRIP_ACTIVE`, `TRIP_STARTED`, `NOT_FOUND`, `INTERNAL_ERROR`.
 
 ## 6. Model data
 
@@ -117,6 +119,8 @@ selesai     → sekarang >= tanggal + arriveTime
 berlangsung → sekarang >= tanggal + departTime
 terjadwal   → selain itu
 ```
+
+**Riwayat.** Pesanan `selesai`/`dibatalkan` bisa dihapus satu-satu (`DELETE /bookings/:code`) atau sekaligus (`DELETE /bookings`). Pesanan aktif (`terjadwal`/`berlangsung`) sengaja dilindungi 409 `TRIP_ACTIVE` karena kursinya masih terpakai.
 
 **Kursi.** Kursi "terjual" demo dibuat deterministik dari hash `scheduleId|date` (`demoSeats`) supaya tampilan konsisten tiap dibuka, lalu digabung dengan kursi pesanan nyata (`bookedSeats`). Satu pesanan maksimal 6 kursi; bentrok → 409 `SEAT_TAKEN`.
 

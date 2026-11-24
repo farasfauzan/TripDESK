@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { deriveStatus } from './bookingStatus.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 // Di serverless (Vercel) filesystem proyek read-only, jadi simpan ke /tmp:
@@ -90,6 +91,30 @@ export function addBooking(booking) {
   bookings = [booking, ...bookings]
   persistBookings()
   return booking
+}
+
+// Hapus satu pesanan. Yang masih aktif (terjadwal/berlangsung) tidak boleh
+// hilang dari riwayat karena kursinya masih terpakai.
+export function removeBooking(code) {
+  const before = bookings.length
+  bookings = bookings.filter((b) => b.code.toLowerCase() !== String(code).toLowerCase())
+  if (bookings.length === before) return false
+  persistBookings()
+  return true
+}
+
+// Bersihkan riwayat: hanya selesai & dibatalkan yang dibuang.
+export function removeHistory() {
+  const kept = bookings.filter((b) => {
+    const status = deriveStatus(b)
+    return status === 'terjadwal' || status === 'berlangsung'
+  })
+  const removed = bookings.length - kept.length
+  if (removed > 0) {
+    bookings = kept
+    persistBookings()
+  }
+  return removed
 }
 
 export function bookingCode() {

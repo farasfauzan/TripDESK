@@ -53,4 +53,7 @@ export const createBooking = (payload) =>
   api('/bookings', { method: 'POST', body: JSON.stringify(payload) })
 export const cancelBooking = (code) =>
   api(`/bookings/${encodeURIComponent(code)}/cancel`, { method: 'PATCH' })
+export const deleteBooking = (code) =>
+  api(`/bookings/${encodeURIComponent(code)}`, { method: 'DELETE' })
+export const clearHistory = () => api('/bookings', { method: 'DELETE' })
 export const getProfile = (signal) => api('/profile', { signal })

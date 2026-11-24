@@ -1,6 +1,6 @@
 import { Router } from 'express'
 import { schedules } from '../data.js'
-import { addBooking, bookedSeats, bookingCode, findBooking, listBookings, persistBookings } from '../store.js'
+import { addBooking, bookedSeats, bookingCode, findBooking, listBookings, persistBookings, removeBooking, removeHistory } from '../store.js'
 import { isIsoDate, shiftTime, todayIso } from '../dates.js'
 import { deriveStatus } from '../bookingStatus.js'
 import { etaForPickup } from '../eta.js'
@@ -111,6 +111,28 @@ router.patch('/bookings/:code/cancel', (req, res) => {
   booking.status = 'dibatalkan'
   persistBookings()
   res.json({ data: serialize(booking) })
+})
+
+// Hapus satu pesanan dari riwayat. Pesanan aktif harus dibatalkan dulu.
+router.delete('/bookings/:code', (req, res) => {
+  const booking = findBooking(req.params.code)
+  if (!booking) return res.status(404).json({ error: { code: 'BOOKING_NOT_FOUND', message: 'Pesanan tidak ditemukan.' } })
+
+  const current = deriveStatus(booking)
+  if (current === 'terjadwal' || current === 'berlangsung') {
+    return res.status(409).json({
+      error: { code: 'TRIP_ACTIVE', message: 'Pesanan yang masih aktif tidak bisa dihapus. Batalkan dulu.' },
+    })
+  }
+
+  removeBooking(booking.code)
+  res.json({ data: { code: booking.code, deleted: true } })
+})
+
+// Bersihkan seluruh riwayat (selesai + dibatalkan). Pesanan aktif tetap disimpan.
+router.delete('/bookings', (_req, res) => {
+  const removed = removeHistory()
+  res.json({ data: { removed } })
 })
 
 export default router
