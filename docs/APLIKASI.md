@@ -16,7 +16,7 @@ Dokumen ini menjelaskan cara aplikasi bekerja. Untuk rencana & backlog lihat [RE
 2. **Peta armada** (`/armada`) menampilkan 4 armada di sekitar titik jemput + estimasi tiba. Pengguna memilih titik jemput & tujuan, lalu memilih armada.
 3. **Detail jadwal** (`/jadwal/:id`) menampilkan jam, harga, armada, sisa kursi, dan titik jemput.
 4. **Pemesanan** (`/pesan/:id`) memilih kursi (1–6) dan mengisi data penumpang → `POST /api/bookings`.
-5. **E-tiket / detail pesanan** (`/pesanan/:code`) menampilkan kode, kursi, titik jemput, dan QR-ish kode.
+5. **E-tiket / detail pesanan** (`/pesanan/:code`) menampilkan kode, kursi, titik jemput, dan QR-ish kode. Tombol **Unduh tiket** menyimpan e-tiket sebagai PNG lewat `<canvas>` (tanpa server, tetap jalan offline).
 6. **Lacak armada** (`/lacak/:code`) menampilkan posisi demo armada pada koridor rute.
 
 Jalur lain (garis putus-putus): **Cari jadwal** (`/cari`) masuk ke detail jadwal tanpa lewat peta; **Tiket saya** (`/pesanan`) membuka detail pesanan; pembatalan lewat `PATCH /api/bookings/:code/cancel` (409 kalau perjalanan sudah berjalan).
@@ -44,7 +44,7 @@ app/src/
 ├── search/     Search.jsx
 ├── schedule/   ScheduleDetail, ScheduleCard
 ├── checkout/   Checkout.jsx
-├── orders/     Orders, OrderDetail, StatusPill
+├── orders/     Orders, OrderDetail, StatusPill, ticketImage (unduh PNG)
 ├── profile/    Profile.jsx
 ├── about/      About.jsx
 ├── shared/     api, utils, animations, weather, Icons, State,
@@ -73,7 +73,7 @@ Warna, tipografi, jarak | `styles.css`
 | `/jadwal/:id` | `schedule/ScheduleDetail` | schedule | Harga, armada, sisa kursi |
 | `/pesan/:id` | `checkout/Checkout` | schedule, profile | Pilih kursi 1–6, `POST /bookings` |
 | `/pesanan` | `orders/Orders` | bookings | Filter status + tombol "Hapus riwayat" (bulk) |
-| `/pesanan/:code` | `orders/OrderDetail` | booking | E-tiket, tombol batal, hapus dari riwayat |
+| `/pesanan/:code` | `orders/OrderDetail` | booking | E-tiket, unduh tiket PNG, tombol batal, hapus dari riwayat |
 | `/lacak/:code` | `tracking/Tracking` | booking | Peta koridor + timeline perjalanan |
 | `/profil` | `profile/Profile` | profile | Ringkasan akun |
 | `/tentang` | `about/About` | — | Statis |

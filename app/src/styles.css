@@ -778,6 +778,20 @@ h3 {
   color: var(--danger);
 }
 
+.btn-soft {
+  border-color: #f0d6c9;
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+
+.btn-soft:hover:not(:disabled) {
+  filter: brightness(0.98);
+}
+
+.ticket-download {
+  margin-top: 14px;
+}
+
 /* ---------- Home ---------- */
 
 .section {

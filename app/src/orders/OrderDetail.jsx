@@ -5,11 +5,13 @@ import { dateLong, rupiah } from '../shared/utils.js'
 import StatusPill from './StatusPill.jsx'
 import ConfirmDialog from '../shared/ConfirmDialog.jsx'
 import { ErrorBox, Loading } from '../shared/State.jsx'
+import { downloadTicket } from './ticketImage.js'
 import {
   CheckIcon,
   ChevronLeftIcon,
   ClockIcon,
   CopyIcon,
+  DownloadIcon,
   PinIcon,
   TrashIcon,
   UserIcon,
@@ -23,7 +25,9 @@ export default function OrderDetail() {
   const [booking, setBooking] = useState(null)
   const [error, setError] = useState('')
   const [flash, setFlash] = useState(Boolean(state?.justBooked))
+  const [notice, setNotice] = useState('')
   const [copied, setCopied] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const [cancelling, setCancelling] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirm, setConfirm] = useState(null)
@@ -44,6 +48,12 @@ export default function OrderDetail() {
     return () => clearTimeout(timer)
   }, [flash])
 
+  useEffect(() => {
+    if (!notice) return undefined
+    const timer = setTimeout(() => setNotice(''), 6000)
+    return () => clearTimeout(timer)
+  }, [notice])
+
   const bars = useMemo(() => {
     if (!booking) return []
     return Array.from({ length: 42 }, (_, index) => {
@@ -60,6 +70,21 @@ export default function OrderDetail() {
       setTimeout(() => setCopied(false), 1800)
     } catch {
       setError('Browser tidak mengizinkan akses clipboard.')
+    }
+  }
+
+  const saveTicket = async () => {
+    if (!booking || downloading) return
+    setDownloading(true)
+    setError('')
+    setNotice('')
+    try {
+      const filename = await downloadTicket(booking)
+      setNotice(`Tiket tersimpan sebagai ${filename}.`)
+    } catch (err) {
+      setError(err.message || 'Tiket gagal diunduh. Coba lagi.')
+    } finally {
+      setDownloading(false)
     }
   }
 
@@ -109,6 +134,16 @@ export default function OrderDetail() {
         <div className="toast toast-ok" role="status">
           <CheckIcon width={18} height={18} />
           Pesanan berhasil dibuat. Tunjukkan e-tiket ini saat naik armada.
+        </div>
+      ) : null}
+
+      {notice ? (
+        <div className="toast toast-ok" role="status">
+          <CheckIcon width={18} height={18} />
+          <span>{notice}</span>
+          <button type="button" className="toast-close" onClick={() => setNotice('')} aria-label="Tutup notifikasi">
+            ×
+          </button>
         </div>
       ) : null}
 
@@ -202,6 +237,16 @@ export default function OrderDetail() {
               Lacak armada
             </Link>
           ) : null}
+
+          <button
+            type="button"
+            className="btn btn-soft btn-block ticket-download"
+            onClick={saveTicket}
+            disabled={downloading}
+          >
+            <DownloadIcon width={17} height={17} />
+            {downloading ? 'Menyiapkan tiket…' : 'Unduh tiket'}
+          </button>
 
           <div className="eticket-actions">
             <button type="button" className="btn btn-ghost" onClick={copyCode}>

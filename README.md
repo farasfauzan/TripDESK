@@ -37,7 +37,7 @@ TripDESK/
 │       ├── search/       # cari jadwal
 │       ├── schedule/     # detail jadwal + ScheduleCard
 │       ├── checkout/     # pemesanan + pilih kursi
-│       ├── orders/       # tiket saya, detail pesanan, StatusPill
+│       ├── orders/       # tiket saya, detail pesanan, unduh tiket PNG
 │       ├── profile/      # profil
 │       ├── about/        # tentang aplikasi
 │       ├── shared/       # api, utils, animations, weather, Icons,
