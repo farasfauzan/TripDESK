@@ -1,6 +1,6 @@
 import { dateLong, formatDate, rupiah, statusOf, todayIso } from '../shared/utils.js'
 
-// E-tiket diunduh sebagai PNG supaya tetap terbaca tanpa koneksi dan tidak
+// E-tiket diunduh 
 // butuh library PDF tambahan. Semua digambar manual di <canvas>.
 const WIDTH = 720
 const PAD = 40
